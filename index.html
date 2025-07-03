@@ -115,21 +115,36 @@ a:hover path {
   </div>
   <script src="panzoom.min.js"></script>
   <script>
-    const svgContainer = document.getElementById("map-container");
-    let didDrag = false;
-
-    const panzoomInstance = window.panzoom(svgContainer, { smoothScroll:false });
-
-    panzoomInstance.on("panstart", () => { didDrag = false; });
-    panzoomInstance.on("pan",      () => { didDrag = true;  });
-
-    document.querySelectorAll("a.map-link").forEach(a=>{
-      a.addEventListener("click", e=>{
-        if(didDrag){
-          e.preventDefault();
-          didDrag = false;
-        }
-      }, true);
+    const svgContainer = document.getElementById('map-wrapper');   // same element
+    const THRESHOLD = 5;   // pixels
+    let startX = 0, startY = 0, dragged = false;
+  
+    const pz = window.panzoom(svgContainer, { smoothScroll:false });
+  
+    pz.on('panstart', e => {
+      dragged = false;
+      // store where the gesture began
+      startX = e.detail.origEvt.clientX;
+      startY = e.detail.origEvt.clientY;
+    });
+  
+    pz.on('pan', e => {
+      const dx = Math.abs(e.detail.origEvt.clientX - startX);
+      const dy = Math.abs(e.detail.origEvt.clientY - startY);
+      if (dx > THRESHOLD || dy > THRESHOLD) dragged = true;
+    });
+  
+    document.querySelectorAll('a.map-link').forEach(a => {
+      a.addEventListener(
+        'click',
+        evt => {
+          if (dragged) {
+            evt.preventDefault(); // suppress only after real drag
+            dragged = false;
+          }
+        },
+        true // capture phase so we intercept early
+      );
     });
   </script>
 </body>
