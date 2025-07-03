@@ -124,6 +124,18 @@ a:hover path {
         bounds: true,
         boundsPadding: 0.1
       });
+
+      let wasPan = false;
+      panZoom.on('panstart', () => { wasPan = false; });
+      panZoom.on('pan', () => { wasPan = true; });
+
+      svg.addEventListener('click', function(event) {
+        if (wasPan) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        wasPan = false;
+      }, true);
     });
   </script>
 </body>
