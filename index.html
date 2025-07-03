@@ -126,11 +126,12 @@ a:hover path {
       });
 
       let wasPan = false;
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       panZoom.on('panstart', () => { wasPan = false; });
       panZoom.on('pan', () => { wasPan = true; });
 
       svg.addEventListener('click', function(event) {
-        if (wasPan) {
+        if (!isTouchDevice && wasPan) {
           event.preventDefault();
           event.stopPropagation();
         }

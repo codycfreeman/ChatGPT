@@ -18,4 +18,4 @@ Open `index.html` in a browser or host it on any web server. It uses the local `
 
 The map will not push surrounding elements around when zooming since the SVG is contained within the page and only its internal transform changes.
 
-Links embedded inside the SVG will only activate when there has not been any panning since the last `mousedown`. If the user drags to pan the map, the pending click is cancelled to avoid accidentally navigating away from the page.
+Links embedded inside the SVG will only activate when there has not been any panning since the last `mousedown`. If the user drags to pan the map, the pending click is cancelled to avoid accidentally navigating away from the page. On touch devices, link clicks are always honored so mobile users can tap links even after moving the map.
