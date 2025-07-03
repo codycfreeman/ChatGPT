@@ -18,4 +18,4 @@ Open `index.html` in a browser or host it on any web server. It uses the local `
 
 The map will not push surrounding elements around when zooming since the SVG is contained within the page and only its internal transform changes.
 
-Links embedded inside the SVG behave differently for desktop and mobile users. On desktop, navigation is cancelled if the map was dragged since the last pointer down so you don't accidentally follow a county link while panning. On touch devices, tapping a link pauses the panzoom interactions so the destination opens normally even after moving the map.
+Links embedded inside the SVG behave differently for desktop and mobile users. On desktop, navigation is cancelled if the mouse dragged the map before the click. Each `<a>` element intercepts the click event and ignores it when the previous interaction was a pan. On touch devices, tapping a link pauses the panzoom interactions so the destination opens normally even after moving the map.
