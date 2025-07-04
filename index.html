@@ -48,8 +48,8 @@
         svgRoot.querySelectorAll('a.map-link').forEach(a=>{
           /* 1️⃣  Ensure mobile browsers see the link */
           const url = a.getAttribute('href');
-          if (url && !a.hasAttributeNS('http://www.w3.org/1999/xlink','href')) {
-            a.setAttributeNS('http://www.w3.org/1999/xlink', 'href', url);
+          if (url && !a.hasAttribute('xlink:href')) {
+            a.setAttribute('xlink:href', url);           // key fix: add prefix
           }
 
           /* 2️⃣  Drag-vs-click guard (unchanged) */
