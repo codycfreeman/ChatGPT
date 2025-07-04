@@ -55,13 +55,16 @@
         });
 
         /* 3️⃣  add xlink:href if missing, and apply drag-guard */
-        svgRoot.querySelectorAll('a.map-link').forEach(a=>{
+        svgRoot.querySelectorAll('a.map-link').forEach(a => {
           const url = a.getAttribute('href');
           if (url && !a.hasAttribute('xlink:href')) {
-            a.setAttribute('xlink:href', url);           // mobile needs this
+            /*  🔑  Use namespaced attribute so iOS treats it as a real link  */
+            const XLINK = 'http://www.w3.org/1999/xlink';
+            a.setAttributeNS(XLINK, 'xlink:href', url);     // for iOS / legacy
           }
-          a.addEventListener('click', ev=>{
-            if (dragged){ ev.preventDefault(); dragged=false; }
+
+          a.addEventListener('click', ev => {
+            if (dragged) { ev.preventDefault(); dragged = false; }
           }, true);
         });
       })
