@@ -46,9 +46,16 @@
 
         /* cancel click only if it followed a real drag */
         svgRoot.querySelectorAll('a.map-link').forEach(a=>{
+          /* 1️⃣  Ensure mobile browsers see the link */
+          const url = a.getAttribute('href');
+          if (url && !a.hasAttributeNS('http://www.w3.org/1999/xlink','href')) {
+            a.setAttributeNS('http://www.w3.org/1999/xlink', 'href', url);
+          }
+
+          /* 2️⃣  Drag-vs-click guard (unchanged) */
           a.addEventListener('click', ev=>{
             if (dragged){ ev.preventDefault(); dragged=false; }
-          }, true);                     // capture phase
+          }, true);
         });
       })
       .catch(err=>{
