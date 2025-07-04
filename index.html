@@ -21,38 +21,45 @@
       .then(svgText => {
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-        const svgRoot = svgDoc.documentElement;      // <svg …>
+        const svgRoot = svgDoc.documentElement;          // <svg …>
 
+        /* 1️⃣  ensure the xlink namespace is present */
+        if (!svgRoot.hasAttribute('xmlns:xlink')) {
+          svgRoot.setAttribute(
+            'xmlns:xlink',
+            'http://www.w3.org/1999/xlink'
+          );
+        }
+
+        /* ---- inject into the page ---- */
         const wrapper = document.getElementById('map-wrapper');
-        wrapper.textContent = '';                    // remove "Loading…"
-        wrapper.appendChild(svgRoot);                // now inline!
+        wrapper.textContent = '';
+        wrapper.appendChild(svgRoot);
 
-        /* ---------- 2. Panzoom on the inline SVG ---------- */
+        /* 2️⃣  Panzoom on the inline SVG (desktop + mobile pinch) */
         const pz = panzoom(svgRoot, { smoothScroll:false });
 
         const THRESHOLD = 5;
-        let sx=0, sy=0, dragged=false;
+        let dragged=false, sx=0, sy=0;
 
         pz.on('panstart', e=>{
           dragged=false;
           sx=e.detail.origEvt.clientX;
           sy=e.detail.origEvt.clientY;
         });
+
         pz.on('pan', e=>{
           const dx=Math.abs(e.detail.origEvt.clientX-sx);
           const dy=Math.abs(e.detail.origEvt.clientY-sy);
           if(dx>THRESHOLD||dy>THRESHOLD) dragged=true;
         });
 
-        /* cancel click only if it followed a real drag */
+        /* 3️⃣  add xlink:href if missing, and apply drag-guard */
         svgRoot.querySelectorAll('a.map-link').forEach(a=>{
-          /* 1️⃣  Ensure mobile browsers see the link */
           const url = a.getAttribute('href');
           if (url && !a.hasAttribute('xlink:href')) {
-            a.setAttribute('xlink:href', url);           // key fix: add prefix
+            a.setAttribute('xlink:href', url);           // mobile needs this
           }
-
-          /* 2️⃣  Drag-vs-click guard (unchanged) */
           a.addEventListener('click', ev=>{
             if (dragged){ ev.preventDefault(); dragged=false; }
           }, true);
