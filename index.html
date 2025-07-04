@@ -5,58 +5,56 @@
   <title>California YPAA Map</title>
 
   <style>
-    /* 1️⃣  prevent scroll-bars inside the iframe */
-    html, body { height:100%; margin:0; overflow:hidden; }
+    /* hide iframe scroll-bars */
+    html,body {height:100%;margin:0;overflow:hidden}
 
-    /* wrapper always fills the iframe */
-    #map-wrapper   { width:100%; height:100%; }
+    /* wrapper fills the page and is the panzoom target */
+    #map-wrapper {width:100%;height:100%;cursor:grab}
 
-    /* object tag stretches with no border/padding */
-    #map-object    { width:100%; height:100%; display:block; cursor:grab; }
+    /* object stretches but lets events bubble up */
+    #map-object {width:100%;height:100%;display:block}
   </style>
 
-  <!-- Panzoom library (≈3 KB) -->
+  <!-- Panzoom tiny bundle -->
   <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
 </head>
 
 <body>
   <div id="map-wrapper">
-    <!-- External SVG lives in the same folder -->
+    <!-- external SVG (kept as-is, with class="map-link" on each <a>) -->
     <object id="map-object"
             data="usa-ca-optimized-viewbox.svg"
             type="image/svg+xml"></object>
   </div>
 
   <script>
-    const THRESHOLD = 5;          // px movement = treated as drag
+    /* ----------  pan + zoom on the wrapper (same document)  ---------- */
+    const wrapper = document.getElementById('map-wrapper');
+    const pz = panzoom(wrapper, { smoothScroll:false });
 
-    /* Run after the SVG finishes loading */
-    document.getElementById('map-object').addEventListener('load', () => {
-      const svgDoc  = document.getElementById('map-object').contentDocument;
-      const svgRoot = svgDoc.documentElement;          // <svg …>
+    /* ----------  cancel link click after a true drag  ---------- */
+    const THRESHOLD = 5;
+    let startX=0,startY=0, dragged=false;
 
-      /* 2️⃣  Panzoom now listens on the SVG itself */
-      const pz = panzoom(svgRoot, { smoothScroll:false });
+    pz.on('panstart', ev=>{
+      dragged=false;
+      startX=ev.detail.origEvt.clientX;
+      startY=ev.detail.origEvt.clientY;
+    });
 
-      let startX = 0, startY = 0, dragged = false;
+    pz.on('pan', ev=>{
+      const dx=Math.abs(ev.detail.origEvt.clientX-startX);
+      const dy=Math.abs(ev.detail.origEvt.clientY-startY);
+      if(dx>THRESHOLD||dy>THRESHOLD) dragged=true;
+    });
 
-      pz.on('panstart', ev => {
-        dragged = false;
-        startX  = ev.detail.origEvt.clientX;
-        startY  = ev.detail.origEvt.clientY;
-      });
-
-      pz.on('pan', ev => {
-        const dx = Math.abs(ev.detail.origEvt.clientX - startX);
-        const dy = Math.abs(ev.detail.origEvt.clientY - startY);
-        if (dx > THRESHOLD || dy > THRESHOLD) dragged = true;
-      });
-
-      /* cancel click only if it followed a drag */
-      svgDoc.querySelectorAll('a.map-link').forEach(a => {
-        a.addEventListener('click', e => {
-          if (dragged) { e.preventDefault(); dragged = false; }
-        }, true);                                // capture phase
+    /* hook link suppression AFTER the SVG loads */
+    document.getElementById('map-object').addEventListener('load',()=>{
+      const svgDoc = document.getElementById('map-object').contentDocument;
+      svgDoc.querySelectorAll('a.map-link').forEach(a=>{
+        a.addEventListener('click',e=>{
+          if(dragged){e.preventDefault();dragged=false;}
+        },true);
       });
     });
   </script>
