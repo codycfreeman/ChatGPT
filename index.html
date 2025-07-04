@@ -4,12 +4,10 @@
   <meta charset="utf-8" />
   <title>California YPAA Map</title>
   <style>
-    html,body {margin:0;height:100%;overflow:hidden}   /* no iframe scroll */
-    #map-wrapper {width:100%;height:100%;cursor:grab}
-    svg {width:100%;height:100%}
+    html,body { margin:0; height:100%; overflow:hidden; }
+    #map-wrapper { width:100%; height:100%; cursor:grab; }
+    svg { width:100%; height:100%; }
   </style>
-
-  <!-- tiny Panzoom bundle -->
   <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
 </head>
 
@@ -17,47 +15,45 @@
   <div id="map-wrapper">Loading map…</div>
 
   <script>
-    /* ----------  1. fetch and inline the SVG  ---------- */
+    /* ---------- 1. fetch SVG, parse, append ---------- */
     fetch('usa-ca-optimized-viewbox.svg')
       .then(r => r.text())
       .then(svgText => {
-        document.getElementById('map-wrapper').innerHTML = svgText;
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgRoot = svgDoc.documentElement;      // <svg …>
 
-        const svgRoot = document.querySelector('#map-wrapper svg');
-        /* remove any embedded XML prolog (just in case) */
-        if (svgRoot.previousSibling && svgRoot.previousSibling.nodeType === 3) {
-          svgRoot.previousSibling.remove();
-        }
+        const wrapper = document.getElementById('map-wrapper');
+        wrapper.textContent = '';                    // remove "Loading…"
+        wrapper.appendChild(svgRoot);                // now inline!
 
-        /* ----------  2. Panzoom on the inline <svg> ---------- */
+        /* ---------- 2. Panzoom on the inline SVG ---------- */
         const pz = panzoom(svgRoot, { smoothScroll:false });
 
-        /* drag-vs-click guard */
         const THRESHOLD = 5;
         let sx=0, sy=0, dragged=false;
 
-        pz.on('panstart', ev => {
+        pz.on('panstart', e=>{
           dragged=false;
-          sx=ev.detail.origEvt.clientX;
-          sy=ev.detail.origEvt.clientY;
+          sx=e.detail.origEvt.clientX;
+          sy=e.detail.origEvt.clientY;
+        });
+        pz.on('pan', e=>{
+          const dx=Math.abs(e.detail.origEvt.clientX-sx);
+          const dy=Math.abs(e.detail.origEvt.clientY-sy);
+          if(dx>THRESHOLD||dy>THRESHOLD) dragged=true;
         });
 
-        pz.on('pan', ev => {
-          const dx=Math.abs(ev.detail.origEvt.clientX - sx);
-          const dy=Math.abs(ev.detail.origEvt.clientY - sy);
-          if (dx > THRESHOLD || dy > THRESHOLD) dragged=true;
-        });
-
-        /* cancel click only after a genuine drag */
+        /* cancel click only if it followed a real drag */
         svgRoot.querySelectorAll('a.map-link').forEach(a=>{
-          a.addEventListener('click', e=>{
-            if (dragged){ e.preventDefault(); dragged=false; }
-          }, true);   // capture phase
+          a.addEventListener('click', ev=>{
+            if (dragged){ ev.preventDefault(); dragged=false; }
+          }, true);                     // capture phase
         });
       })
-      .catch(err => {
-        document.getElementById('map-wrapper').textContent =
-          'Error loading SVG: ' + err;
+      .catch(err=>{
+        document.getElementById('map-wrapper')
+          .textContent = 'Error loading SVG: ' + err;
       });
   </script>
 </body>
