@@ -3,19 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <title>California YPAA Map</title>
-
   <style>
-    /* keep the Hostinger iframe clean */
     html,body { margin:0; height:100%; overflow:hidden; }
-
-    /* wrapper fills the iframe and shows grab cursor */
     #map-wrapper { width:100%; height:100%; cursor:grab; }
-
-    /* inline SVG stretches with the wrapper */
     svg { width:100%; height:100%; }
   </style>
-
-  <!-- local Panzoom (same folder as this file) -->
   <script src="panzoom.min.js"></script>
 </head>
 
@@ -23,16 +15,14 @@
   <div id="map-wrapper">Loading map…</div>
 
   <script>
-    /* ---------- 1. fetch SVG, parse, inline ---------- */
     fetch('usa-ca-optimized-viewbox.svg')
       .then(r => r.text())
       .then(svgText => {
-        /* parse as real SVG so browsers treat it correctly */
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-        const svgRoot = svgDoc.documentElement;           // <svg …>
+        /* ---- parse + inject ---- */
+        const svgRoot = new DOMParser()
+          .parseFromString(svgText,'image/svg+xml')
+          .documentElement;
 
-        /* ensure xlink namespace so iOS recognises links */
         if (!svgRoot.hasAttribute('xmlns:xlink')) {
           svgRoot.setAttribute(
             'xmlns:xlink',
@@ -40,57 +30,57 @@
           );
         }
 
-        /* inject into the page */
         const wrapper = document.getElementById('map-wrapper');
-        wrapper.textContent = '';          // remove "Loading…"
+        wrapper.textContent = '';
         wrapper.appendChild(svgRoot);
 
-        /* ---------- 2. Panzoom on the inline SVG ---------- */
-        const pz = panzoom(svgRoot, { smoothScroll:false });
+        /* ---- Panzoom ---- */
+        const pz = panzoom(svgRoot,{smoothScroll:false});
 
-        const THRESHOLD = 5;               // px before we call it a drag
-        let dragged = false, sx = 0, sy = 0;
+        const TH = 5;
+        let dragged=false,sx=0,sy=0;
 
-        /* helper returns clientX / clientY for mouse *or* touch */
-        function getPoint(ev){
-          if (ev.touches && ev.touches.length){
-            return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
-          }
-          return { x: ev.clientX, y: ev.clientY };
-        }
+        const pt = ev =>
+          ev.touches && ev.touches.length
+            ? {x:ev.touches[0].clientX,y:ev.touches[0].clientY}
+            : {x:ev.clientX,y:ev.clientY};
 
-        pz.on('panstart', ev => {
-          dragged = false;
-          const p = getPoint(ev.detail.origEvt);
-          sx = p.x;  sy = p.y;
+        pz.on('panstart',e=>{
+          dragged=false;
+          ({x:sx,y:sy}=pt(e.detail.origEvt));
         });
 
-        pz.on('pan', ev => {
-          const p = getPoint(ev.detail.origEvt);
-          const dx = Math.abs(p.x - sx);
-          const dy = Math.abs(p.y - sy);
-          if (dx > THRESHOLD || dy > THRESHOLD) dragged = true;
+        pz.on('pan',e=>{
+          const {x,y}=pt(e.detail.origEvt);
+          if (Math.abs(x-sx)>TH||Math.abs(y-sy)>TH) dragged=true;
         });
 
-        /* ---------- 3. mobile link support + drag-guard ---------- */
-        const XLINK = 'http://www.w3.org/1999/xlink';
+        /* ---- make taps open on mobile even after transform ---- */
+        const XLINK='http://www.w3.org/1999/xlink';
 
-        svgRoot.querySelectorAll('a.map-link').forEach(a => {
-          /* add xlink:href so iOS treats it as a real link */
-          const url = a.getAttribute('href');
-          if (url && !a.hasAttribute('xlink:href')) {
-            a.setAttributeNS(XLINK, 'xlink:href', url);
+        svgRoot.querySelectorAll('a.map-link').forEach(a=>{
+          const url=a.getAttribute('href');
+          if(url && !a.hasAttribute('xlink:href')){
+            a.setAttributeNS(XLINK,'xlink:href',url);
           }
 
-          /* cancel click only if a real drag occurred */
-          a.addEventListener('click', ev => {
-            if (dragged) { ev.preventDefault(); dragged = false; }
-          }, true);                         // capture phase
+          /* desktop guard */
+          a.addEventListener('click',ev=>{
+            if(dragged){ ev.preventDefault(); dragged=false; }
+          },true);
+
+          /* mobile fallback */
+          a.addEventListener('touchend',ev=>{
+            if(!dragged){
+              window.open(url,
+                a.getAttribute('target')==='_blank' ? '_blank' : '_self');
+            }
+          },{passive:true});
         });
       })
-      .catch(err => {
+      .catch(err=>{
         document.getElementById('map-wrapper')
-          .textContent = 'Error loading SVG: ' + err;
+          .textContent='Error loading SVG: '+err;
       });
   </script>
 </body>
