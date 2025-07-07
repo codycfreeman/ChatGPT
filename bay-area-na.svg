@@ -75,7 +75,7 @@ a:hover path {
        d="m 11.847861,66.601877 -0.004,0.143 0.022,0.072 0.271,0.569 0.527,1.068 0.257,0.368 0.69,0.606 0.432,0.31 0.87,0.92 1.203,1.991 0.068,0.113 -0.068,0.235 -0.639,-0.091 -1.794,0.086 -0.072,-0.406 -0.158,-0.747 -0.113,-0.279 -0.099,-0.19 -0.09,-0.122 -0.203,-0.181 -0.095,-0.021 -0.505,0.117 -0.451,-0.023 -0.233,-0.032 -0.163,-0.041 -0.081,-0.044 -0.032,-0.019 -0.143,-0.081 -0.109,-0.064 -0.392,-0.445 -0.388,-0.558 -0.292,-0.696 -0.2439998,-0.733 -0.027,-0.536 0.082,-0.51 0.8369998,-0.14 0.879,0.243 0.068,-0.175 0.189,-0.707"
        id="Santa Cruz"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title1">Santa Cruz Area NA</title>
     </path>
@@ -89,7 +89,7 @@ a:hover path {
        d="m 11.004861,60.660877 -0.018,0.005 -0.22,1.316 0.134,0.211 1.56,1.637 0.113,0.071 0.27,0.095 0.185,-0.049 0.005,-0.013 0.185,0.464 -1.371,2.204 -0.189,0.707 -0.068,0.175 -0.879,-0.243 -0.8369998,0.14 -0.082,0.51 0.027,0.536 -0.081,-0.131 -0.275,-0.451 -0.37,-0.69 -0.045,-0.127 0.023,-0.612 0.167,-3.344 0.31,-1.361 0.379,-1.356 1.0769998,0.306"
        id="San Mateo"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title2">Peninsula Area NA</title>
     </path>
@@ -103,7 +103,7 @@ a:hover path {
        d="m 12.442861,58.533877 0.446,0.009 0.054,0.031 0.303,0.424 0.193,0.604 0.041,0.301 1.762,1.812 3.565,-0.095 0.73,-0.081 -0.405,1.461 -0.555,2.019 0.072,0.154 0.55,0.838 -0.009,-0.01 -3.74,-1.067 -0.122,-0.014 -0.104,0.077 -0.077,0.036 -0.351,0.045 -0.18,-0.023 -1.236,-0.423 -0.161,-0.234 -0.185,-0.464 0.009,-2.263 -0.78,-2.263 0.18,-0.874"
        id="Alameda"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title3">Alameda County Area NA</title>
     </path>
@@ -117,7 +117,7 @@ a:hover path {
        d="m 13.218861,64.397877 0.161,0.234 1.236,0.423 0.18,0.023 0.351,-0.045 0.077,-0.036 0.104,-0.077 0.122,0.014 3.74,1.067 -0.158,0.064 -0.04,0.676 0.289,3.299 1.135,0.979 0.054,0.17 -0.144,0.695 -0.212,0.333 -0.257,0.117 -0.144,0.505 0.009,0.073 0.077,0.17 0.139,0.144 -2.005,-0.539 -0.919,-0.195 -0.898,0.505 0.068,-0.235 -0.068,-0.113 -1.203,-1.991 -0.87,-0.92 -0.432,-0.31 -0.69,-0.606 -0.257,-0.368 -0.527,-1.068 -0.271,-0.569 -0.022,-0.072 0.004,-0.143 1.371,-2.204"
        id="Santa Clara"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title4">Greater San Jose Area NA</title>
     </path>
@@ -131,7 +131,7 @@ a:hover path {
        d="m 13.470861,56.599877 0.87,0.527 0.5,0.145 2.127,0.517 0.144,0.015 0.131,-0.009 0.091,-0.059 0.081,-0.099 0.207,0.568 0.09,0.121 0.253,0.104 0.112,0.026 0.392,0.009 0.442,-0.125 0.239,-0.15 0.049,-0.089 0.028,-0.181 0.049,-0.08 0.072,-0.036 h 0.112 l 0.573,0.103 0.18,0.094 0.032,0.041 -0.708,3.497 -0.73,0.081 -3.565,0.095 -1.762,-1.812 -0.041,-0.301 -0.193,-0.604 -0.303,-0.424 -0.054,-0.031 -0.446,-0.009 -0.387,-0.284 -0.37,-0.843 1.28,-0.28 0.212,-0.1 0.275,-0.215 0.027,-0.086 -0.009,-0.126"
        id="Contra Costa"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title5">Contra Costa Area NA (CCANA)</title>
     </path>
@@ -145,7 +145,7 @@ a:hover path {
        d="m 12.451861,55.022877 2.047,0.59 0.044,-0.117 -0.022,-0.058 -0.036,-0.005 -0.054,-0.076 -0.036,-0.105 0.027,-0.112 0.545,-1.564 1.366,0.382 0.045,-0.107 0.014,-0.113 0.013,-0.23 -0.009,-0.108 -0.045,-0.293 -0.221,-0.667 0.004,-0.063 0.018,-0.085 0.455,-0.856 0.05,-0.055 0.455,0.076 3.412,0.681 0.104,0.172 v 0.04 l -0.108,0.46 -0.613,2.176 0.982,0.281 -0.825,1.385 -1.104,1.137 -0.959,0.095 -0.586,-0.247 -0.081,0.099 -0.091,0.059 -0.131,0.009 -0.144,-0.015 -2.127,-0.517 -0.5,-0.145 -0.87,-0.527 -1.001,-1.501 -0.018,-0.076"
        id="Solano"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title6">Napa-Solano Area NA</title>
     </path>
@@ -159,7 +159,7 @@ a:hover path {
        d="m 11.004861,60.660877 -1.0769998,-0.306 v -0.009 l 0.013,-0.199 0.1269998,-0.735 0.117,-0.067 0.464,-0.091 0.388,0.027 0.185,0.046 0.068,0.1 0.071,0.22 -0.058,0.77 -0.058,0.186 -0.24,0.058"
        id="San Franciso"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title7">San Francisco Area NA (SFNA)</title>
     </path>
@@ -173,7 +173,7 @@ a:hover path {
        d="m 7.1918612,51.597877 0.122,-0.064 0.816,0.019 0.081,0.021 2.1319998,2.538 1.131,1.262 -0.36,0.938 -0.374,1.185 -0.028,0.1 0.068,0.107 0.167,0.207 0.167,0.277 0.058,0.143 -0.004,0.04 -0.595,0.581 -0.266,-0.031 -0.167,-0.086 -0.113,-0.108 -3.1769998,-3.646 0.527,-2.808 -0.031,-0.239 -0.113,-0.329 -0.041,-0.107"
        id="Marin"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title8">Marin County NA Area Service Committee</title>
     </path>
@@ -187,7 +187,7 @@ a:hover path {
        d="m 15.093861,46.196877 0.942,0.596 0.495,2.636 0.117,0.744 0.014,0.266 -0.005,0.942 -0.05,0.055 -0.455,0.856 -0.018,0.085 -0.004,0.063 0.221,0.667 0.045,0.293 0.009,0.108 -0.013,0.23 -0.014,0.113 -0.045,0.107 -1.366,-0.382 -0.545,1.564 -0.027,0.112 0.036,0.105 0.054,0.076 0.036,0.005 0.022,0.058 -0.044,0.117 -2.047,-0.59 0.392,0.072 0.311,-0.505 0.023,-0.297 -0.009,-0.302 -0.122,-1.042 -0.69,-2.442 -0.396,-1.087 0.032,-0.847 0.166,-0.555 1.708,-0.022 1.155,-0.978 0.112,-0.171 -0.04,-0.65"
        id="Napa"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title9">Napa-Solano Area NA</title>
     </path>
@@ -201,7 +201,7 @@ a:hover path {
        d="m 3.8388612,44.214877 0.388,-0.024 1.334,0.014 2.92,0.239 2.4749998,0.752 1.203,2.822 -0.166,0.555 -0.032,0.847 0.396,1.087 0.69,2.442 0.122,1.042 0.009,0.302 -0.023,0.297 -0.311,0.505 -0.392,-0.072 0.018,0.076 -0.996,0.275 -1.131,-1.262 -2.1319998,-2.538 -0.081,-0.021 -0.816,-0.019 -0.122,0.064 -0.639,-2.273 -2.087,-3.993 -0.627,-1.117"
        id="Sonoma"
        inkscape:connector-curvature="0"
-       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
+       style="font-size:12px;fill:#7d8c74;fill-rule:nonzero;stroke:#dce3e8;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:none">
       <title
          id="title10">Sonoma County Fellowship (“SoCo NA”)w</title>
     </path>
