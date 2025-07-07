@@ -1,21 +1,31 @@
-# California YPAA Map with Zoom
+# MCYPAA Interactive Maps  🌉🗺️
 
-This repository hosts an HTML page that inlines the California county SVG map and adds zoom & pan capabilities.
+This repository holds the self-contained HTML/SVG assets that power the
+interactive **California** and **Bay-Area** maps embedded on  
+[marinypaa.org](https://marinypaa.org/).
 
-## Files
+* **Pan & zoom** on desktop (mouse-drag / wheel / track-pad).  
+* **Pinch-zoom** & drag on mobile, single-tap opens county links.  
+* Fully offline — no external JS/CDN required.
 
-- `usa-ca-optimized-viewbox.svg` – source SVG map.
-- `panzoom.min.js` – local copy of the [panzoom](https://github.com/anvaka/panzoom) library.
-- `index.html` – standalone page that displays the map with zoom.
+---
 
-## Usage
+## File guide
 
-Open `index.html` in a browser or host it on any web server. It uses the local `panzoom.min.js` to allow zooming and panning so no external network access is required. Embed this page in another site with an `<iframe>` tag if desired.
+| File | What it is | How it connects |
+|------|------------|-----------------|
+| **`index.html`** | Stand-alone web page that inlines a chosen SVG, wires [panzoom](https://github.com/anvaka/panzoom) and adds desktop/mobile tap-logic. | - Loads **`panzoom.min.js`**<br>- Fetches **`usa-ca-optimized-viewbox.svg`** by default (change the filename to swap maps). |
+| **`panzoom.min.js`** | Local, minified copy of *anvaka/panzoom* (≈ 3 KB). | Provides cross-browser zoom + pan. Keeping it local avoids CSP/CORS issues. |
+| **`usa-ca-optimized-viewbox.svg`** | Full 58-county California map. Each county `<a>` carries `class="map-link"` and a live URL. | Rendered by `index.html` when you open the page or embed it in an `<iframe>`. |
+| **`bay-area-na.svg`** *(example)* | 10-county Bay-Area extract with NA links. | Swap the `fetch()` path in `index.html` (or make a copy of the page) to display this regional map. |
 
-```
-<iframe src="path/to/index.html" width="100%" height="600" style="border:0;"></iframe>
-```
+*(Add any new regional SVGs here as you create them.)*
 
-The map will not push surrounding elements around when zooming since the SVG is contained within the page and only its internal transform changes.
+---
 
-Links embedded inside the SVG behave differently for desktop and mobile users. On desktop, navigation is cancelled if the map was panned. The script listens for the `panend` event and ignores the first click after a drag. On touch devices, tapping a link pauses panzoom so the destination opens normally even after moving the map.
+## Quick start (view locally)
+
+```bash
+git clone https://github.com/<your-user>/ChatGPT.git
+cd ChatGPT
+open index.html            # macOS; or simply double-click the file on Windows
