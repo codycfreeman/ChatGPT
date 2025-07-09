@@ -1,106 +1,87 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><title>Daily Reflection</title>
-
-<!-- MCYPAA branding -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
-:root{--fern:#4b6b43;--stone:#7d8c74;}
+:root{--fern:#4b6b43;--stone:#7d8c74}
 html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
 #card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);
-      border-radius:12px;box-shadow:0 2px 6px #0002;}
+      border-radius:12px;box-shadow:0 2px 6px #0002}
 h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}
 p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}
 small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
 </style>
 </head><body>
-<div id="card">
-  <h2>Loading …</h2>
-  <p>Fetching today’s Daily Reflection.</p>
-</div>
+<div id="card"><h2>Loading …</h2><p>Fetching today’s Daily Reflection.</p></div>
 
 <script>
-/* ---------- configuration ---------- */
 const card = document.getElementById('card');
 const FEED = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
 const PAGE = 'https://www.aa.org/daily-reflections';
-const prox1 = u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
-const prox2 = u => 'https://r.jina.ai/http://' + u.replace(/^https?:\/\//, ''); // plain text proxy
+const prox1 = u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
+const prox2 = u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,'');
 
-/* ---------- helper to render ---------- */
-function render(title, text, src){
-  card.innerHTML = `
-    <h2>${title}</h2>
-    <p>${text}</p>
+function render(title,text,src){
+  card.innerHTML=`<h2>${title}</h2><p>${text}</p>
     <small>${src} via A.A. World Services •
       <a href="https://www.aa.org/daily-reflections" target="_blank"
-         style="color:var(--fern);text-decoration:none">View archive</a>
-    </small>`;
+         style="color:var(--fern);text-decoration:none">View archive</a></small>`;
 }
 
-/* ---------- Step 1 – Try hidden RSS feed ---------- */
-fetch(prox1(FEED), {cache:'no-store'})
-  .then(r => r.ok ? r.text() : Promise.reject())
-  .then(xml => {
-     const d = new DOMParser().parseFromString(xml,'text/xml');
-     const i = d.querySelector('item');
-     const title = i?.querySelector('title')?.textContent.trim();
-     const desc  = i?.querySelector('description')?.textContent
-                    ?.replace(/<[^>]+>/g,'').trim();
-     if (title && desc) render(title, desc, 'RSS');
-     else throw 'rss-empty';
-  })
-  .catch(()=> scrapeHtmlOrText());
+/* ---------- 1️⃣ try RSS ---------- */
+fetch(prox1(FEED),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
+.then(xml=>{
+  const d=new DOMParser().parseFromString(xml,'text/xml');
+  const i=d.querySelector('item');
+  const t=i?.querySelector('title')?.textContent.trim();
+  const desc=i?.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim();
+  if(t&&desc) render(t,desc,'RSS'); else throw 'rss-empty';
+})
+.catch(()=>scrapeHtmlOrText());
 
-/* ---------- Step 2 – Scrape HTML or plain-text ---------- */
+/* ---------- 2️⃣ HTML / TEXT scrape ---------- */
 function scrapeHtmlOrText(){
-  /* First proxy: AllOrigins (HTML) */
-  fetch(prox1(PAGE), {cache:'no-store'})
+  fetch(prox1(PAGE),{cache:'no-store'})
     .then(r=>r.ok?r.text():Promise.reject())
-    .then(html => parsePossibleHtml(html, 'HTML via AllOrigins'))
-    .catch(() => /* Second proxy: Jina AI (plain text) */
-      fetch(prox2(PAGE), {cache:'no-store'})
-        .then(r=>r.ok?r.text():Promise.reject())
-        .then(text => {
-           const cleaned = extractReflection(text);
-           if (cleaned) render('Daily Reflection', cleaned, 'Plain text');
-           else throw 'parse-fail';
-        })
-        .catch(finalFail));
+    .then(h=>parseHtml(h,'HTML via AllOrigins'))
+    .catch(()=>fetch(prox2(PAGE),{cache:'no-store'})
+      .then(r=>r.ok?r.text():Promise.reject())
+      .then(txt=>{
+        let body = extractReflection(txt);
+        if(!body) body = firstTwoParas(txt);  /* ← new graceful fallback */
+        body ? render('Daily Reflection',body,'Plain text')
+             : finalFail('parse-fail');
+      })
+      .catch(finalFail));
 }
 
-/* ---------- Parse HTML if it is HTML ---------- */
-function parsePossibleHtml(html, src){
-  if (!html.trim().startsWith('<')) throw 'not-html';
-  const doc = new DOMParser().parseFromString(html,'text/html');
-  const h   = doc.querySelector('main h1, main h2, main h3');
-  let body  = '';
-  let n = h?.nextElementSibling;
-  while (n && n.tagName === 'P'){
-    body += n.textContent.trim() + ' ';
-    n = n.nextElementSibling;
-  }
-  body = body.trim();
-  if (body) render(h ? h.textContent.trim() : 'Daily Reflection', body, src);
-  else throw 'html-no-body';
+function parseHtml(html,src){
+  if(!html.trim().startsWith('<')) throw 'not-html';
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const h=doc.querySelector('main h1,h2,h3');
+  let body='', n=h?.nextElementSibling;
+  while(n&&n.tagName==='P'){ body+=n.textContent.trim()+' '; n=n.nextElementSibling;}
+  body=body.trim();
+  if(body) render(h?h.textContent.trim():'Daily Reflection',body,src);
+  else throw 'html-empty';
 }
 
-/* ---------- Extract reflection from plain text ---------- */
+/* ------- extract from Jina AI plain text ------- */
 function extractReflection(md){
-  /* Start = first all-caps heading or date line, End = “From the book …” */
-  const startMatch = md.match(/^\s*[A-Z][A-Z\s,'-]+$/m) || md.match(/^\d{4}-\d{2}-\d{2}/m);
-  const endMatch   = md.match(/^\s*From the book/i);
-  if (!startMatch || !endMatch || endMatch.index <= startMatch.index) return '';
-  return md.slice(startMatch.index, endMatch.index).trim().replace(/\s{2,}/g,' ');
+  const start=md.match(/^[A-Z][A-Z\s,'-]+$/m)?.index;
+  const end  =md.match(/^\s*From the book/i)?.index;
+  if(start==null||end==null||end<=start) return '';
+  return md.slice(start,end).trim().replace(/\s{2,}/g,' ');
+}
+/* if extract fails: take first 2 paragraphs */
+function firstTwoParas(md){
+  const parts=md.trim().split(/\n{2,}/).filter(t=>t.trim());
+  return parts.length? parts.slice(0,2).join(' ') : '';
 }
 
-/* ---------- Final error fallback ---------- */
 function finalFail(e){
-  console.error('Daily Reflection error:', e);
-  render('Daily Reflection',
-         'Sorry — unable to load today’s reading.',
-         'Error');
+  console.error('Daily Reflection error:',e);
+  render('Daily Reflection','Sorry — unable to load today’s reading.','Error');
 }
 </script>
 </body></html>
