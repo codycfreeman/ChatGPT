@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<title>Daily Reflection</title>
+
+<!-- Montserrat  -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap">
+
+<style>
+:root{
+  --fern: #4b6b43;        /* brand accent */
+  --stone:#7d8c74;        /* subtle border */
+}
+html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
+#card{
+  max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;
+  border:2px solid var(--stone);border-radius:12px;box-shadow:0 2px 6px #0002;
+}
+h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}
+p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}
+small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
+</style>
+</head><body>
+<div id="card">
+  <h2>Loading …</h2>
+  <p>Please wait while we fetch today’s Daily Reflection.</p>
+</div>
+
+<script>
+const RSS   = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
+const CORS  = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(RSS);
+fetch(CORS).then(r=>r.text()).then(xml=>{
+  const doc=new DOMParser().parseFromString(xml,'text/xml');
+  const item=doc.querySelector('item');
+  const title = item.querySelector('title').textContent;
+  const desc  = item.querySelector('description').textContent
+                   .replace(/<[^>]+>/g,'')           /* strip HTML */
+                   .replace(/\s+/g,' ').trim();       /* tidy spaces */
+
+  document.querySelector('#card').innerHTML=`
+    <h2>${title}</h2>
+    <p>${desc}</p>
+    <small>via A.A. World Services •
+      <a href="https://www.aa.org/daily-reflections" target="_blank"
+         style="color:var(--fern);text-decoration:none">View archive</a>
+    </small>`;
+}).catch(()=>{
+  document.querySelector('#card').innerHTML=`
+    <h2>Daily Reflection</h2>
+    <p>Sorry — unable to load today’s reading.</p>
+    <small>Check your connection or visit
+    <a href="https://www.aa.org/daily-reflections" target="_blank"
+       style="color:var(--fern);text-decoration:none">AA.org</a>.</small>`;
+});
+</script>
+</body></html>
