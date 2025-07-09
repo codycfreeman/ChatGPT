@@ -22,48 +22,69 @@ small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
 </div>
 
 <script>
-const card = document.getElementById('card');
-const XLINK = 'http://www.w3.org/1999/xlink';   // for later reuse
+const card  = document.getElementById('card');
+const RSS   = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
+const CORS  = url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
 
-/* ------------ 1️⃣  Try the hidden RSS feed via CORS proxy ------------ */
-const RSS  = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
-const CORS = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(RSS);
-
-fetch(CORS, {cache:'no-store'}).then(r=>r.ok ? r.text() : Promise.reject())
-.then(xml=>{
-  const doc = new DOMParser().parseFromString(xml,'text/xml');
-  const item= doc.querySelector('item');
-  const title=item.querySelector('title').textContent;
-  const desc =item.querySelector('description').textContent
-                 .replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-  render(title,desc, true);
-})
-.catch(()=>fallbackScrape());
-
-/* ------------ 2️⃣ fallback: scrape aa.org/daily-reflections ------------ */
-function fallbackScrape(){
-  fetch('https://api.allorigins.win/raw?url='+
-        encodeURIComponent('https://www.aa.org/daily-reflections'),
-        {cache:'no-store'})
-    .then(r=>r.text()).then(html=>{
-      const doc=new DOMParser().parseFromString(html,'text/html');
-      const title=doc.querySelector('h1,h2,h3')?.textContent.trim()||'Daily Reflection';
-      const text =doc.querySelector('.main-content p')?.textContent.trim()
-                 || 'Sorry — unable to load today’s reading.';
-      render(title,text,false);
-    }).catch(()=>render('Daily Reflection',
-      'Sorry — unable to load today’s reading.',false));
-}
-
-/* ------------ 3️⃣ render the card ------------ */
-function render(title,body,viaRSS){
+/* ------------ helper to render ------------- */
+function render(title,body,src){
   card.innerHTML = `
     <h2>${title}</h2>
     <p>${body}</p>
-    <small>${viaRSS?'RSS':'HTML scrape'} via A.A. World Services •
+    <small>${src} via A.A. World Services •
       <a href="https://www.aa.org/daily-reflections" target="_blank"
          style="color:var(--fern);text-decoration:none">View archive</a>
     </small>`;
+}
+
+/* ------------ 1️⃣  try hidden RSS ------------ */
+fetch(CORS(RSS), {cache:'no-store'})
+  .then(r => r.ok ? r.text() : Promise.reject('rss-bad'))
+  .then(xml => {
+      const doc   = new DOMParser().parseFromString(xml,'text/xml');
+      const item  = doc.querySelector('item');
+      const title = item?.querySelector('title')?.textContent?.trim();
+      const desc  = item?.querySelector('description')?.textContent
+                       ?.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+      if(title && desc) { render(title,desc,'RSS'); }
+      else              { throw 'rss-empty'; }
+  })
+  .catch(()=>fallbackScrape());
+
+/* ------------ 2️⃣ fallback scrape ------------ */
+function fallbackScrape(){
+  fetch(CORS('https://www.aa.org/daily-reflections'), {cache:'no-store'})
+    .then(r=>r.text()).then(html=>{
+       const doc = new DOMParser().parseFromString(html,'text/html');
+
+       /* Flexible selectors that match current layout */
+       const title = (doc.querySelector('.page-title, h1, h2') ||
+                      {}).textContent?.trim() || 'Daily Reflection';
+
+       let body   = '';
+       /* Primary container used on current AA site */
+       const mainBlock = doc.querySelector('.field--name-field-daily-reflection-text');
+       if(mainBlock){
+         body = mainBlock.textContent.trim();
+       }else{
+         /* Fallback: first paragraph under main-content */
+         body = doc.querySelector('.main-content p')?.textContent.trim() || '';
+       }
+
+       if(body){
+         render(title,body,'HTML scrape');
+       }else{
+         render('Daily Reflection',
+                'Sorry — unable to load today’s reading.',
+                'Error');
+       }
+    })
+    .catch(err=>{
+       console.error('Daily-Reflection scrape error', err);
+       render('Daily Reflection',
+              'Sorry — unable to load today’s reading.',
+              'Error');
+    });
 }
 </script>
 </body></html>
