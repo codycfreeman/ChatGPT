@@ -21,67 +21,59 @@ const PAGE = 'https://www.aa.org/daily-reflections';
 const prox1 = u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
 const prox2 = u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,'');
 
+/* render helper */
 function render(title,text,src){
   card.innerHTML=`<h2>${title}</h2><p>${text}</p>
-    <small>${src} via A.A. World Services •
-      <a href="https://www.aa.org/daily-reflections" target="_blank"
-         style="color:var(--fern);text-decoration:none">View archive</a></small>`;
+  <small>${src} via A.A. World Services •
+    <a href="https://www.aa.org/daily-reflections" target="_blank"
+       style="color:var(--fern);text-decoration:none">View archive</a></small>`;
 }
 
-/* ---------- 1️⃣ try RSS ---------- */
+/* 1️⃣  hidden RSS (fastest when it works) */
 fetch(prox1(FEED),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
 .then(xml=>{
   const d=new DOMParser().parseFromString(xml,'text/xml');
-  const i=d.querySelector('item');
-  const t=i?.querySelector('title')?.textContent.trim();
-  const desc=i?.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim();
-  if(t&&desc) render(t,desc,'RSS'); else throw 'rss-empty';
+  const itm=d.querySelector('item');
+  const title=itm?.querySelector('title')?.textContent.trim();
+  const body =itm?.querySelector('description')?.textContent
+                ?.replace(/<[^>]+>/g,'').trim();
+  if(title&&body) render(title,body,'RSS'); else throw 0;
 })
-.catch(()=>scrapeHtmlOrText());
+.catch(()=>scrape());
 
-/* ---------- 2️⃣ HTML / TEXT scrape ---------- */
-function scrapeHtmlOrText(){
+/* 2️⃣  HTML then plain-text scrape */
+function scrape(){
   fetch(prox1(PAGE),{cache:'no-store'})
     .then(r=>r.ok?r.text():Promise.reject())
     .then(h=>parseHtml(h,'HTML via AllOrigins'))
     .catch(()=>fetch(prox2(PAGE),{cache:'no-store'})
-      .then(r=>r.ok?r.text():Promise.reject())
-      .then(txt=>{
-        let body = extractReflection(txt);
-        if(!body) body = firstTwoParas(txt);  /* ← new graceful fallback */
-        body ? render('Daily Reflection',body,'Plain text')
-             : finalFail('parse-fail');
-      })
-      .catch(finalFail));
+          .then(r=>r.ok?r.text():Promise.reject())
+          .then(t=>parsePlain(t))
+          .catch(e=>render('Daily Reflection',
+            'Sorry — unable to load today’s reading.','Error')));
 }
 
+/* parse real HTML */
 function parseHtml(html,src){
-  if(!html.trim().startsWith('<')) throw 'not-html';
+  if(!html.trim().startsWith('<')) throw 0;
   const doc=new DOMParser().parseFromString(html,'text/html');
   const h=doc.querySelector('main h1,h2,h3');
-  let body='', n=h?.nextElementSibling;
-  while(n&&n.tagName==='P'){ body+=n.textContent.trim()+' '; n=n.nextElementSibling;}
-  body=body.trim();
-  if(body) render(h?h.textContent.trim():'Daily Reflection',body,src);
-  else throw 'html-empty';
+  let txt='',n=h?.nextElementSibling;
+  while(n&&n.tagName==='P'){txt+=n.textContent.trim()+' ';n=n.nextElementSibling;}
+  txt=txt.trim();
+  if(txt) render(h?h.textContent.trim():'Daily Reflection',txt,src); else throw 0;
 }
 
-/* ------- extract from Jina AI plain text ------- */
-function extractReflection(md){
-  const start=md.match(/^[A-Z][A-Z\s,'-]+$/m)?.index;
-  const end  =md.match(/^\s*From the book/i)?.index;
-  if(start==null||end==null||end<=start) return '';
-  return md.slice(start,end).trim().replace(/\s{2,}/g,' ');
-}
-/* if extract fails: take first 2 paragraphs */
-function firstTwoParas(md){
-  const parts=md.trim().split(/\n{2,}/).filter(t=>t.trim());
-  return parts.length? parts.slice(0,2).join(' ') : '';
-}
-
-function finalFail(e){
-  console.error('Daily Reflection error:',e);
-  render('Daily Reflection','Sorry — unable to load today’s reading.','Error');
+/* clean Jina-AI plain text */
+function parsePlain(md){
+  const paras=md.split(/\n{2,}/).map(s=>s.trim())
+      .filter(p=>p && !/^Title:|^URL|^Source:/i.test(p));
+  if(paras.length){
+    const body=paras.slice(0,2).join(' ');
+    render('Daily Reflection',body,'Plain text');
+  }else{
+    throw 0;
+  }
 }
 </script>
 </body></html>
