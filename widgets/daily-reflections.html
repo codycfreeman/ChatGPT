@@ -22,7 +22,7 @@ const prox2=u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,'');
 
 /* ---------- helpers ---------- */
 const card=document.getElementById('card');
-const metaRx=/^(Title|URL|Source|Published Time|Markdown Content):/i;
+const metaRx = /^(Title|URL|URL Source|Source|Published|Markdown)/i;
 
 function render(t,txt,src){
   card.innerHTML=`<h2>${t}</h2><p>${txt}</p>
