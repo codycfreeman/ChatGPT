@@ -2,15 +2,16 @@
 <meta charset="utf-8">
 <title>Daily Reflection</title>
 
-<!-- Montserrat -->
+<!-- MCYPAA branding -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 :root{ --fern:#4b6b43; --stone:#7d8c74; }
 html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
-#card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);
-      border-radius:12px;box-shadow:0 2px 6px #0002;}
+#card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;
+      border:2px solid var(--stone);border-radius:12px;
+      box-shadow:0 2px 6px #0002;}
 h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}
 p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}
 small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
@@ -22,69 +23,73 @@ small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
 </div>
 
 <script>
-const card  = document.getElementById('card');
-const RSS   = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
-const CORS  = url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+/* -----------------------------------------------------------
+   CONFIG
+----------------------------------------------------------- */
+const card = document.getElementById('card');
+const FEED = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
+const PAGE = 'https://www.aa.org/daily-reflections';
+const CORS = u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
 
-/* ------------ helper to render ------------- */
-function render(title,body,src){
-  card.innerHTML = `
-    <h2>${title}</h2>
-    <p>${body}</p>
-    <small>${src} via A.A. World Services •
-      <a href="https://www.aa.org/daily-reflections" target="_blank"
-         style="color:var(--fern);text-decoration:none">View archive</a>
-    </small>`;
-}
-
-/* ------------ 1️⃣  try hidden RSS ------------ */
-fetch(CORS(RSS), {cache:'no-store'})
-  .then(r => r.ok ? r.text() : Promise.reject('rss-bad'))
+/* -----------------------------------------------------------
+   STEP 1 – Try hidden RSS feed first
+----------------------------------------------------------- */
+fetch(CORS(FEED), {cache:'no-store'})
+  .then(r => r.ok ? r.text() : Promise.reject('feed-fail'))
   .then(xml => {
       const doc   = new DOMParser().parseFromString(xml,'text/xml');
       const item  = doc.querySelector('item');
-      const title = item?.querySelector('title')?.textContent?.trim();
+      const title = item?.querySelector('title')?.textContent.trim();
       const desc  = item?.querySelector('description')?.textContent
-                       ?.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-      if(title && desc) { render(title,desc,'RSS'); }
-      else              { throw 'rss-empty'; }
+                     ?.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+      if (title && desc) { render(title, desc, 'RSS'); }
+      else { throw 'feed-empty'; }
   })
-  .catch(()=>fallbackScrape());
+  .catch(()=>scrapeHTML());
 
-/* ------------ 2️⃣ fallback scrape ------------ */
-function fallbackScrape(){
-  fetch(CORS('https://www.aa.org/daily-reflections'), {cache:'no-store'})
-    .then(r=>r.text()).then(html=>{
-       const doc = new DOMParser().parseFromString(html,'text/html');
+/* -----------------------------------------------------------
+   STEP 2 – Fallback scrape of aa.org/daily-reflections
+----------------------------------------------------------- */
+function scrapeHTML(){
+  fetch(CORS(PAGE), {cache:'no-store'})
+    .then(r => r.text())
+    .then(html => {
+       const doc   = new DOMParser().parseFromString(html,'text/html');
+       /* a) Title = first H1/H2/H3 in main */
+       const hTag  = doc.querySelector('main h1, main h2, main h3');
+       const title = hTag ? hTag.textContent.trim() : 'Daily Reflection';
 
-       /* Flexible selectors that match current layout */
-       const title = (doc.querySelector('.page-title, h1, h2') ||
-                      {}).textContent?.trim() || 'Daily Reflection';
-
-       let body   = '';
-       /* Primary container used on current AA site */
-       const mainBlock = doc.querySelector('.field--name-field-daily-reflection-text');
-       if(mainBlock){
-         body = mainBlock.textContent.trim();
-       }else{
-         /* Fallback: first paragraph under main-content */
-         body = doc.querySelector('.main-content p')?.textContent.trim() || '';
+       /* b) Body  = all <p> siblings immediately after that heading */
+       let body = '';
+       let el = hTag?.nextElementSibling;
+       while (el && el.tagName === 'P'){
+         body += el.textContent.trim() + ' ';
+         el = el.nextElementSibling;
        }
+       body = body.trim();
 
-       if(body){
-         render(title,body,'HTML scrape');
-       }else{
-         render('Daily Reflection',
-                'Sorry — unable to load today’s reading.',
-                'Error');
-       }
+       if (body) render(title, body, 'HTML scrape');
+       else throw 'no-body';
     })
     .catch(err=>{
-       console.error('Daily-Reflection scrape error', err);
+       console.error('Daily Reflection scrape error:', err);
        render('Daily Reflection',
               'Sorry — unable to load today’s reading.',
               'Error');
     });
+}
+
+/* -----------------------------------------------------------
+   Helper: write result to the card
+----------------------------------------------------------- */
+function render(title, text, src){
+  card.innerHTML = `
+    <h2>${title}</h2>
+    <p>${text}</p>
+    <small>${src} via A.A. World Services •
+      <a href="https://www.aa.org/daily-reflections" target="_blank"
+         style="color:var(--fern);text-decoration:none">View archive</a>
+    </small>`;
 }
 </script>
 </body></html>
