@@ -3,67 +3,76 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{--fern:#4b6b43;--stone:#7d8c74;}
+:root{--fern:#4b6b43;--stone:#7d8c74}
 html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
 #card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);
-      border-radius:12px;box-shadow:0 2px 6px #0002;}
+      border-radius:12px;box-shadow:0 2px 6px #0002}
 h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}
 p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}
 small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
 </style></head><body>
-<div id="card"><h2>Loading …</h2><p>Please wait while we fetch today’s Daily Reflection.</p></div>
+<div id="card"><h2>Loading …</h2><p>Fetching today’s Daily Reflection.</p></div>
+
 <script>
 const card  = document.getElementById('card');
 const FEED  = 'https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
 const PAGE  = 'https://www.aa.org/daily-reflections';
 const prox1 = u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
-const prox2 = u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,''); // returns plain html
+const prox2 = u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,''); // plain text
 
-/* --------------------------------------------------- */
-/* 1️⃣  Try hidden RSS (still fastest)                  */
-/* --------------------------------------------------- */
-fetch(prox1(FEED),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
-.then(xml=>{
-  const d=new DOMParser().parseFromString(xml,'text/xml');
-  const i=d.querySelector('item'); const t=i?.querySelector('title')?.textContent.trim();
-  const desc=i?.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim();
-  if(t&&desc) return render(t,desc,'RSS'); throw 'noRSS';
-})
-.catch(()=>scrapeHTML());
-
-/* --------------------------------------------------- */
-/* 2️⃣  Scrape page through two proxies                 */
-/* --------------------------------------------------- */
-function scrapeHTML(){
-  tryProxy(prox1).catch(()=>tryProxy(prox2)).catch(finalFail);
-}
-
-function tryProxy(proxyFn){
-  return fetch(proxyFn(PAGE),{cache:'no-store'}).then(r=>r.text()).then(parseHTML);
-}
-
-function parseHTML(html){
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  const h=doc.querySelector('main h1,h2,h3');              // title
-  let body=''; let n=h?.nextElementSibling;
-  while(n&&n.tagName==='P'){ body+=n.textContent.trim()+' '; n=n.nextElementSibling; }
-  body=body.trim();
-  if(body) return render(h?h.textContent.trim():'Daily Reflection',body,'HTML');
-  throw 'noBody';
-}
-
-/* --------------------------------------------------- */
-/* Helper functions                                    */
-/* --------------------------------------------------- */
+/* ---------- helper: render card ---------- */
 function render(title,text,src){
   card.innerHTML=`<h2>${title}</h2><p>${text}</p>
     <small>${src} via A.A. World Services •
-    <a href="https://www.aa.org/daily-reflections" target="_blank"
-       style="color:var(--fern);text-decoration:none">View archive</a></small>`;
+      <a href="https://www.aa.org/daily-reflections" target="_blank"
+         style="color:var(--fern);text-decoration:none">View archive</a>
+    </small>`;
 }
 
+/* ---------- 1️⃣  try hidden RSS ---------- */
+fetch(prox1(FEED),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
+.then(xml=>{
+  const d = new DOMParser().parseFromString(xml,'text/xml');
+  const i = d.querySelector('item');
+  const title=i?.querySelector('title')?.textContent.trim();
+  const desc =i?.querySelector('description')?.textContent
+                ?.replace(/<[^>]+>/g,'').trim();
+  if(title&&desc) render(title,desc,'RSS');
+  else throw 'rss-missing';
+})
+.catch(()=>scrapeHtmlOrText());
+
+/* ---------- 2️⃣  scrape page via two proxies ---------- */
+function scrapeHtmlOrText(){
+  /* First proxy: AllOrigins HTML */
+  fetch(prox1(PAGE),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
+  .then(html=> parsePossibleHtml(html,'HTML via AllOrigins'))
+  .catch(()=>/* Second proxy: Jina AI plain text */ 
+     fetch(prox2(PAGE),{cache:'no-store'})
+        .then(r=>r.ok?r.text():Promise.reject())
+        .then(text=>{
+            const clean=text.split('\n').filter(l=>l.trim()).join(' ');
+            render('Daily Reflection',clean,'Plain text');
+        })
+        .catch(finalFail));
+}
+
+/* parse HTML if it looks like HTML, else throw */
+function parsePossibleHtml(html,src){
+  if(!html.trim().startsWith('<')) throw 'not-html';
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const h = doc.querySelector('main h1,h2,h3');
+  let body=''; let n=h?.nextElementSibling;
+  while(n&&n.tagName==='P'){ body+=n.textContent.trim()+' '; n=n.nextElementSibling;}
+  body=body.trim();
+  if(body) render(h?h.textContent.trim():'Daily Reflection',body,src);
+  else throw 'html-no-body';
+}
+
+/* graceful error */
 function finalFail(e){
-  console.error('Daily Reflection error:',e);
+  console.error('Daily Reflection error:', e);
   render('Daily Reflection','Sorry — unable to load today’s reading.','Error');
 }
-</script></body></html>
+</script>
+</body></html>
