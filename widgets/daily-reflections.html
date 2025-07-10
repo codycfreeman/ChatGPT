@@ -2,82 +2,8 @@
 <meta charset="utf-8"><title>Daily Reflection</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{--fern:#4b6b43;--stone:#7d8c74}
-html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
-#card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);
-      border-radius:12px;box-shadow:0 2px 6px #0002}
-h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}
-p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}
-small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}
-</style></head><body>
+<style>:root{--fern:#4b6b43;--stone:#7d8c74}html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}#card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);border-radius:12px;box-shadow:0 2px 6px #0002}h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}small{display:block;margin-top:1.2rem;font-size:.78rem;color:#666}</style>
+</head><body>
 <div id="card"><h2>Loading …</h2><p>Fetching today’s Daily Reflection.</p></div>
-
-<script>
-/* ---------- URLs & proxies ---------- */
-const FEED='https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
-const PAGE='https://www.aa.org/daily-reflections';
-const prox1=u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
-const prox2=u=>'https://r.jina.ai/http://'+u.replace(/^https?:\/\//,'');
-
-/* ---------- render helper ---------- */
-const card=document.getElementById('card');
-function render(t,txt,src){
-  card.innerHTML=`<h2>${t}</h2><p>${txt}</p>
-  <small>${src} via A.A. World Services •
-    <a href="https://www.aa.org/daily-reflections" target="_blank"
-       style="color:var(--fern);text-decoration:none">View archive</a></small>`;
-}
-
-/* ---------- 1️⃣  hidden RSS ---------- */
-fetch(prox1(FEED),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject())
-.then(xml=>{
-  const d=new DOMParser().parseFromString(xml,'text/xml');
-  const i=d.querySelector('item');
-  const title=i?.querySelector('title')?.textContent.trim();
-  const body =i?.querySelector('description')?.textContent?.replace(/<[^>]+>/g,'').trim();
-  if(title&&body) return render(title,body,'RSS');
-  throw 0;
-}).catch(()=>scrape());
-
-/* ---------- 2️⃣  HTML scrape → plain-text scrape ---------- */
-function scrape(){
-  fetch(prox1(PAGE),{cache:'no-store'})
-   .then(r=>r.ok?r.text():Promise.reject())
-   .then(h=>parseHtml(h,'HTML via AllOrigins'))
-   .catch(()=>fetch(prox2(PAGE),{cache:'no-store'})
-     .then(r=>r.ok?r.text():Promise.reject())
-     .then(t=>parsePlain(t))
-     .catch(()=>render('Daily Reflection',
-          'Sorry — unable to load today’s reading.','Error')));
-}
-
-/* ---------- parse genuine HTML ---------- */
-function parseHtml(html,src){
-  if(!html.trim().startsWith('<')) throw 0;
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  const h=doc.querySelector('main h1,h2,h3');
-  let body='', n=h?.nextElementSibling;
-  while(n&&n.tagName==='P'){ body+=n.textContent.trim()+' '; n=n.nextElementSibling; }
-  body=body.trim();
-  if(body) render(h?h.textContent.trim():'Daily Reflection',body,src);
-  else throw 0;
-}
-
-/* ---------- parse Jina AI plain-text ---------- */
-function parsePlain(md){
-  /* ❶ split into logical lines, ❷ drop meta lines, ❸ grab first 2 paras */
-  const meta=/^(Title|URL|URL Source|Source|Published|Markdown|Daily Reflections\b|\[Skip|\[Search|Search\s+\[x\]|=+$|-+$)/i;
-  const cleanLines=md.split(/\n+/).map(l=>l.trim())
-      .filter(l=>l && !meta.test(l) && !l.startsWith('javascript:void'));
-
-  /* title = first markdown ### heading or ALL-CAPS line */
-  let title='Daily Reflection';
-  if(cleanLines[0].startsWith('###'))      title=cleanLines.shift().replace(/^###\s*/,'').trim();
-  else if(/^[A-Z][A-Z\s,'-]+$/.test(cleanLines[0])) title=cleanLines.shift();
-
-  const body=cleanLines.slice(0,2).join(' ');
-  render(title,body,'Plain text');
-}
-</script>
+<script type="module" src="daily-reflections.js"></script>
 </body></html>
