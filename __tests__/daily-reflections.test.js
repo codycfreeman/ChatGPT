@@ -22,3 +22,11 @@ test('cleans jina ai text with all-caps title',()=>{
   expect(title).toBe('HUMILITY IS THE KEY');
   expect(body).toBe('Some text here. More insight.');
 });
+
+const sample3=`Daily Reflection\nSubmit Common Searches:\n\nPlain text via A.A. World Services \u2022 View archive`;
+
+test('filters leftover navigation text',()=>{
+  const {title,body}=parsePlainText(sample3);
+  expect(title).toBe('Daily Reflection');
+  expect(body).toBe('');
+});
