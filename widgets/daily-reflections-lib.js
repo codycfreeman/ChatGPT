@@ -3,6 +3,7 @@ export function parsePlainText(md){
   const isJunk=l=>!l||
     /^(Title:?|URL|URL Source|Source|Published|Markdown|Submit|Common Searches:|Daily Reflections?\b|Daily Reflection\b|\[Skip|\[Search|Search\s+\[x\]|=+$|-+$)/i.test(l)||
     /alcoholics anonymous|aa grapevine|A\.A\. World Services|View archive|Plain text via/i.test(l)||
+    /^\[[^\]]+\]\([^)]*\)(\s+\[[^\]]+\]\([^)]*\))*$/.test(l)||
     l.startsWith('javascript:void');
   const clean=lines.filter(l=>!isJunk(l));
   let title='Daily Reflection';
