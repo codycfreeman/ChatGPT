@@ -28,14 +28,22 @@ const sample3=`Daily Reflection\nSubmit Common Searches:\n\nPlain text via A.A. 
 
 const sample4=fs.readFileSync(new URL('../tests/sample-plain.txt', import.meta.url), 'utf8');
 
+const sample5=`Daily Reflection\n[Skip to main content]\nSuper Navigation * Find Help\n\nPlain text via A.A. World Services \u2022 View archive`;
+
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
   expect(title).toBe('Daily Reflection');
   expect(body).toBe('');
 });
 
-test('filters meetings and anonymity links',()=>{
+test('filters contribution and bookstore lines',()=>{
   const {title,body}=parsePlainText(sample4);
+  expect(title).toBe('Daily Reflection');
+  expect(body).toBe('');
+});
+
+test('filters skip links and super navigation',()=>{
+  const {title,body}=parsePlainText(sample5);
   expect(title).toBe('Daily Reflection');
   expect(body).toBe('');
 });
