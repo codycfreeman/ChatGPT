@@ -1,5 +1,5 @@
 // Daily Reflections widget logic
-import {parsePlainText} from './daily-reflections-lib.js';
+import {parsePlainText, parseDailyHtml} from './daily-reflections-lib.js';
 const FEED='https://www.aa.org/sites/default/files/feed-en-aaregroom-calendar.xml';
 const PAGE='https://www.aa.org/daily-reflections';
 const prox1=u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u);
@@ -16,20 +16,15 @@ function parsePlain(md){
   else throw 0;
 }
 
-function parseHtml(html,src){
-  if(!html.trim().startsWith('<')) throw 0;
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  const h=doc.querySelector('main h1,h2,h3');
-  let body='',n=h?.nextElementSibling;
-  while(n&&n.tagName==='P'){body+=n.textContent.trim()+' ';n=n.nextElementSibling;}
-  body=body.trim();
-  if(body) render(h?h.textContent.trim():'Daily Reflection',body); else throw 0;
+function parseHtml(html){
+  const {title,body}=parseDailyHtml(html);
+  if(body) render(title,body); else throw 0;
 }
 
 function scrape(){
   fetch(prox1(PAGE),{cache:'no-store'})
     .then(r=>r.ok?r.text():Promise.reject())
-    .then(h=>parseHtml(h,'HTML via AllOrigins'))
+    .then(h=>parseHtml(h))
     .catch(()=>fetch(prox2(PAGE),{cache:'no-store'})
       .then(r=>r.ok?r.text():Promise.reject())
       .then(t=>parsePlain(t))

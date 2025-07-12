@@ -18,3 +18,23 @@ export function parsePlainText(md){
   }
   return {title, body:body.join(' ').trim()};
 }
+
+export function parseDailyHtml(html){
+  const strip=t=>t.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+  html=html.replace(/<script[^>]*>[\s\S]*?<\/script>|<style[^>]*>[\s\S]*?<\/style>/gi,'');
+  const main=html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1]||'';
+  const h=main.match(/<(h1|h2)[^>]*>([\s\S]*?)<\/\1>/i);
+  const title=h?strip(h[2]):'Daily Reflection';
+  let rest=main.slice(h?main.indexOf(h[0])+h[0].length:0).trimStart();
+  const ps=[];
+  const pRe=/<p[^>]*>([\s\S]*?)<\/p>/ig;
+  let m,last=0;
+  while((m=pRe.exec(rest))){
+    if(m.index>last && /[^\s]/.test(rest.slice(last,m.index))) break;
+    ps.push(strip(m[1]));
+    last=pRe.lastIndex;
+  }
+  const body=ps.join(' ').trim();
+  const res=parsePlainText(`### ${title}\n${body}`);
+  return res.body?res:{title,body};
+}
