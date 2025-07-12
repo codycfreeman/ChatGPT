@@ -1,4 +1,4 @@
-import {parsePlainText} from '../widgets/daily-reflections-lib.js';
+import {parsePlainText, parseDailyHtml} from '../widgets/daily-reflections-lib.js';
 import fs from 'fs';
 
 const sample1=`Daily Reflections | Alcoholics Anonymous
@@ -46,4 +46,14 @@ test('filters skip links and super navigation',()=>{
   const {title,body}=parsePlainText(sample5);
   expect(title).toBe('Daily Reflection');
   expect(body).toBe('');
+});
+
+const html=fs.readFileSync(new URL('../tests/fixtures/daily-reflections.html', import.meta.url),'utf8');
+
+test('parses saved daily reflections html',()=>{
+  const {title,body}=parseDailyHtml(html);
+  expect(title).toBe('ASKING FOR HELP');
+  expect(body.length).toBeGreaterThan(100);
+  expect(body).not.toMatch(/Make a Contribution/);
+  expect(body).not.toMatch(/Select your language Mega Menu/);
 });
