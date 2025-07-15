@@ -30,6 +30,7 @@ const sample4=fs.readFileSync(new URL('../tests/sample-plain.txt', import.meta.u
 
 const sample5=`Daily Reflection\n[Skip to main content]\nSuper Navigation * Find Help\n\nPlain text via A.A. World Services \u2022 View archive`;
 const sample6=fs.readFileSync(new URL('../tests/fixtures/fail-megamenu.txt', import.meta.url),'utf8');
+const sample7=fs.readFileSync(new URL('../tests/fixtures/fail-left-right.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -51,6 +52,12 @@ test('filters skip links and super navigation',()=>{
 
 test('filters select your language mega menu',()=>{
   const {title,body}=parsePlainText(sample6);
+  expect(title).toBe('Daily Reflection');
+  expect(body).toBe('');
+});
+
+test('filters left/right navigation line',()=>{
+  const {title,body}=parsePlainText(sample7);
   expect(title).toBe('Daily Reflection');
   expect(body).toBe('');
 });
