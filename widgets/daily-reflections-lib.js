@@ -56,7 +56,7 @@ export function parseJinaText(raw){
   raw=raw.replace(/\r/g,'');
   const lines=raw.split('\n');
   let i=0;
-  const out={title:'Daily Reflection',date:'',quote:'',body:''};
+  const out={title:'Daily Reflection',date:'',quotes:[],body:''};
   while(i<lines.length && !/^###\s+/.test(lines[i].trim())) i++;
   if(i<lines.length){
     out.title=lines[i].trim().replace(/^###\s*/,'').replace(/^"|"$/g,'').trim();
@@ -69,10 +69,15 @@ export function parseJinaText(raw){
     let t=lines[i].trim();
     if(!t.startsWith('**')) break;
     t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').replace(/^"|"$/g,'').trim();
-    if(t&&!seen.has(t)){seen.add(t);quotes.push(t);}
+    const key=t.replace(/["'“”‘’]/g,'').toLowerCase();
+    if(t && !seen.has(key)){
+      seen.add(key);
+      quotes.push(t);
+      if(quotes.length>=4) {i++; break;}
+    }
     i++;
   }
-  out.quote=quotes.join('\n');
+  out.quotes=quotes;
   const foot=[/^\*\s+Left/i,/^\*\s+Right/i,/Plain text via/i,/Make a Contribution/i,/Online Bookstore/i,/Select your language/i];
   const paras=[]; let p=[];
   for(;i<lines.length;i++){
