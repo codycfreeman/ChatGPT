@@ -1,4 +1,4 @@
-import {parsePlainText, parseDailyHtml, parseDailyRss} from '../widgets/daily-reflections-lib.js';
+import {parsePlainText, parseDailyHtml, parseDailyRss, parseJinaText} from '../widgets/daily-reflections-lib.js';
 import fs from 'fs';
 
 const sample1=`Daily Reflections | Alcoholics Anonymous
@@ -31,6 +31,9 @@ const sample4=fs.readFileSync(new URL('../tests/sample-plain.txt', import.meta.u
 const sample5=`Daily Reflection\n[Skip to main content]\nSuper Navigation * Find Help\n\nPlain text via A.A. World Services \u2022 View archive`;
 const sample6=fs.readFileSync(new URL('../tests/fixtures/fail-megamenu.txt', import.meta.url),'utf8');
 const sample7=fs.readFileSync(new URL('../tests/fixtures/fail-left-right.txt', import.meta.url),'utf8');
+
+const jina1=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina.txt', import.meta.url),'utf8');
+const jina2=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina-footer.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -79,4 +82,21 @@ test('parses sample rss feed',()=>{
   expect(title).toBe('ASKING FOR HELP');
   expect(body.length).toBeGreaterThan(200);
   expect(body).not.toMatch(/Make a Contribution/);
+});
+
+test('parses jina sample and strips nav',()=>{
+  const res=parseJinaText(jina1);
+  expect(res.title).toBe('I AM AN INSTRUMENT');
+  expect(res.date).toBe('July 11');
+  expect(res.quote).toBe('We ask simply that throughout the day...\nBig Book p. 86');
+  expect(res.body).toMatch(/fear cloud my usefulness/);
+  expect(res.body).not.toMatch(/Left \* Right/);
+});
+
+test('stops before footer link',()=>{
+  const res=parseJinaText(jina2);
+  expect(res.title).toBe('A SIMPLE CHOICE');
+  expect(res.date).toBe('May 15');
+  expect(res.body).not.toMatch(/Online Bookstore/);
+  expect(res.body).toMatch(/Service is at the heart/);
 });

@@ -51,3 +51,37 @@ export function parseDailyRss(xml){
   const res=parsePlainText(`### ${title}\n${clean}`);
   return res.body?res:{title,body:res.body?res.body.trim():''};
 }
+
+export function parseJinaText(raw){
+  raw=raw.replace(/\r/g,'');
+  const lines=raw.split('\n');
+  let i=0;
+  const out={title:'Daily Reflection',date:'',quote:'',body:''};
+  while(i<lines.length && !/^###\s+/.test(lines[i].trim())) i++;
+  if(i<lines.length){
+    out.title=lines[i].trim().replace(/^###\s*/,'').replace(/^"|"$/g,'').trim();
+    i++;
+  }
+  while(i<lines.length && !lines[i].trim()) i++;
+  if(i<lines.length){out.date=lines[i].trim(); i++;}
+  const quotes=[]; const seen=new Set();
+  while(i<lines.length){
+    let t=lines[i].trim();
+    if(!t.startsWith('**')) break;
+    t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').replace(/^"|"$/g,'').trim();
+    if(t&&!seen.has(t)){seen.add(t);quotes.push(t);}
+    i++;
+  }
+  out.quote=quotes.join('\n');
+  const foot=[/^\*\s+Left/i,/^\*\s+Right/i,/Plain text via/i,/Make a Contribution/i,/Online Bookstore/i,/Select your language/i];
+  const paras=[]; let p=[];
+  for(;i<lines.length;i++){
+    const line=lines[i]; const t=line.trim();
+    if(t===''){if(p.length){paras.push(p.join(' '));p=[];} continue;}
+    if(t.startsWith('[')||foot.some(re=>re.test(t))) break;
+    p.push(t);
+  }
+  if(p.length) paras.push(p.join(' '));
+  out.body=paras.join('\n\n').trim();
+  return out;
+}
