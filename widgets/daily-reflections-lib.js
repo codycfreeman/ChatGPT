@@ -38,3 +38,16 @@ export function parseDailyHtml(html){
   const res=parsePlainText(`### ${title}\n${body}`);
   return res.body?res:{title,body};
 }
+
+export function parseDailyRss(xml){
+  const item=xml.match(/<item>([\s\S]*?)<\/item>/i)?.[1]||'';
+  const t=item.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.trim()||'Daily Reflection';
+  const desc=item.match(/<description>([\s\S]*?)<\/description>/i)?.[1]||'';
+  const clean=desc
+    .replace(/<!\[CDATA\[|\]\]>/g,'')
+    .replace(/<\/?p[^>]*>/gi,'\n')
+    .replace(/<[^>]*>/g,'');
+  const title=t.replace(/<[^>]*>/g,'').trim();
+  const res=parsePlainText(`### ${title}\n${clean}`);
+  return res.body?res:{title,body:res.body?res.body.trim():''};
+}
