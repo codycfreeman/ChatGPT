@@ -1,9 +1,74 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8"><title>Daily Reflection</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily Reflection</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-<style>:root{--fern:#4b6b43;--stone:#7d8c74}html,body{margin:0;padding:0;font-family:Montserrat,Arial,sans-serif;background:#fff}#card{max-width:420px;margin:0 auto;padding:1.4rem 1.6rem;border:2px solid var(--stone);border-radius:12px;box-shadow:0 2px 6px #0002}h2{margin:0 0 .6rem;font-size:1.2rem;color:var(--fern)}p{margin:.6rem 0;font-size:1rem;line-height:1.35;color:#333}</style>
-</head><body>
-<div id="card"><h2>Loading …</h2><p>Fetching today’s Daily Reflection.</p></div>
-<script type="module" src="./daily-reflections.js"></script>
-</body></html>
+<style>
+:root{--fern:#4b6b43;--stone:#7d8c74;--fog:#dce3e8}
+body{margin:0;font-family:Montserrat,Arial,sans-serif;background:#fff}
+#card{max-width:420px;margin:1.5rem auto;padding:1.4rem;border:2px solid var(--stone);border-radius:12px;box-shadow:0 2px 6px #0002}
+#card h2{margin:0 0 .4rem;font-size:1.2rem;color:var(--fern)}
+#card .date{margin:.2rem 0 .8rem;font-size:.9rem;color:var(--stone)}
+#card blockquote{margin:.4rem 0;padding-left:1em;border-left:4px solid var(--fern);color:#333}
+#card .body p{margin:.6rem 0;font-size:1rem;line-height:1.4;color:#333}
+</style>
+</head>
+<body>
+<div id="card"><h2>Loading…</h2></div>
+<script type="module">
+async function fetchText(){
+  const r=await fetch('https://r.jina.ai/http://www.aa.org/daily-reflections',{cache:'no-store'});
+  if(!r.ok) throw new Error('fetch');
+  return r.text();
+}
+function parseJinaText(raw){
+  raw=raw.replace(/\r/g,'');
+  const lines=raw.split('\n');
+  let i=0;
+  const out={title:'Daily Reflection',date:'',quote:'',body:''};
+  while(i<lines.length && !/^###\s+/.test(lines[i].trim())) i++;
+  if(i<lines.length){
+    out.title=lines[i].trim().replace(/^###\s*/,'').replace(/^"|"$/g,'').trim();
+    i++;
+  }
+  while(i<lines.length && !lines[i].trim()) i++;
+  if(i<lines.length){out.date=lines[i].trim();i++;}
+  const seen=new Set(),quotes=[];
+  while(i<lines.length){
+    let t=lines[i].trim();
+    if(!t.startsWith('**')) break;
+    t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').replace(/^"|"$/g,'').trim();
+    if(t&&!seen.has(t)){seen.add(t);quotes.push(t);}
+    i++;
+  }
+  out.quote=quotes.join('\n');
+  const foot=[/^\*\s+Left/i,/^\*\s+Right/i,/Plain text via/i,/Make a Contribution/i,/Online Bookstore/i,/Select your language/i];
+  const paras=[];let p=[];
+  for(;i<lines.length;i++){
+    const line=lines[i],t=line.trim();
+    if(t===''){if(p.length){paras.push(p.join(' '));p=[];}continue;}
+    if(t.startsWith('[')||foot.some(re=>re.test(t))) break;
+    p.push(t);
+  }
+  if(p.length) paras.push(p.join(' '));
+  out.body=paras.join('\n\n').trim();
+  return out;
+}
+function render(d){
+  const card=document.getElementById('card');
+  if(!d) return card.innerHTML='<p>Unable to load today\'s Daily Reflection.</p>';
+  let h=`<h2>${d.title}</h2>`;
+  if(d.date) h+=`<div class="date">${d.date}</div>`;
+  if(d.quote) h+=`<blockquote>${d.quote.replace(/\n/g,'<br>')}</blockquote>`;
+  if(d.body){
+    const ps=d.body.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('');
+    h+=`<div class="body">${ps}</div>`;
+  }
+  card.innerHTML=h;
+}
+fetchText().then(t=>render(parseJinaText(t))).catch(()=>render(null));
+</script>
+</body>
+</html>
