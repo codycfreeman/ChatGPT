@@ -34,6 +34,7 @@ const sample7=fs.readFileSync(new URL('../tests/fixtures/fail-left-right.txt', i
 
 const jina1=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina.txt', import.meta.url),'utf8');
 const jina2=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina-footer.txt', import.meta.url),'utf8');
+const jinaDup=fs.readFileSync(new URL('../tests/fixtures/dup-quotes-jina.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -88,7 +89,10 @@ test('parses jina sample and strips nav',()=>{
   const res=parseJinaText(jina1);
   expect(res.title).toBe('I AM AN INSTRUMENT');
   expect(res.date).toBe('July 11');
-  expect(res.quote).toBe('We ask simply that throughout the day...\nBig Book p. 86');
+  expect(res.quotes).toEqual([
+    'We ask simply that throughout the day...',
+    'Big Book p. 86'
+  ]);
   expect(res.body).toMatch(/fear cloud my usefulness/);
   expect(res.body).not.toMatch(/Left \* Right/);
 });
@@ -99,4 +103,11 @@ test('stops before footer link',()=>{
   expect(res.date).toBe('May 15');
   expect(res.body).not.toMatch(/Online Bookstore/);
   expect(res.body).toMatch(/Service is at the heart/);
+});
+
+test('dedupes duplicate quote lines',()=>{
+  const res=parseJinaText(jinaDup);
+  expect(res.quotes.length).toBe(2);
+  expect(res.quotes[0]).toMatch(/throughout the day/);
+  expect(res.quotes[1]).toMatch(/Big Book p. 86/);
 });
