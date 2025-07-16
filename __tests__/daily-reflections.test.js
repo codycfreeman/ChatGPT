@@ -1,4 +1,4 @@
-import {parsePlainText, parseDailyHtml} from '../widgets/daily-reflections-lib.js';
+import {parsePlainText, parseDailyHtml, parseDailyRss} from '../widgets/daily-reflections-lib.js';
 import fs from 'fs';
 
 const sample1=`Daily Reflections | Alcoholics Anonymous
@@ -64,10 +64,19 @@ test('filters left/right navigation line',()=>{
 
 const html=fs.readFileSync(new URL('../tests/fixtures/daily-reflections.html', import.meta.url),'utf8');
 
+const rss=fs.readFileSync(new URL('../tests/fixtures/rss-sample.xml', import.meta.url),'utf8');
+
 test('parses saved daily reflections html',()=>{
   const {title,body}=parseDailyHtml(html);
   expect(title).toBe('ASKING FOR HELP');
   expect(body.length).toBeGreaterThan(100);
   expect(body).not.toMatch(/Make a Contribution/);
   expect(body).not.toMatch(/Select your language Mega Menu/);
+});
+
+test('parses sample rss feed',()=>{
+  const {title,body}=parseDailyRss(rss);
+  expect(title).toBe('ASKING FOR HELP');
+  expect(body.length).toBeGreaterThan(200);
+  expect(body).not.toMatch(/Make a Contribution/);
 });
