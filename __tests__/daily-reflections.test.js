@@ -36,6 +36,8 @@ const jina1=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina.txt', imp
 const jina2=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina-footer.txt', import.meta.url),'utf8');
 const jinaDup=fs.readFileSync(new URL('../tests/fixtures/dup-quotes-jina.txt', import.meta.url),'utf8');
 const dupQuote=fs.readFileSync(new URL('../tests/fixtures/dup-quote.txt', import.meta.url),'utf8');
+const dupQuoteRaw=fs.readFileSync(new URL('../tests/fixtures/dup-quote-raw.txt', import.meta.url),'utf8');
+const dupQuoteVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-variant.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -118,4 +120,18 @@ test('dedupes and limits to two quote lines',()=>{
   expect(res.quotes.length).toBe(2);
   expect(res.quotes[0]).toMatch(/My stability came out/);
   expect(res.quotes[1]).toMatch(/Thus I think it can work out/);
+});
+
+test('dedupes raw curly quote block',()=>{
+  const res=parseJinaText(dupQuoteRaw);
+  expect(res.quotes.length).toBe(2);
+  expect(res.quotes[0]).toMatch(/We ask simply/);
+  expect(res.quotes[1]).toMatch(/Big Book p\. 86/);
+});
+
+test('handles punctuation variants',()=>{
+  const res=parseJinaText(dupQuoteVariant);
+  expect(res.quotes.length).toBe(2);
+  expect(res.quotes[0]).toMatch(/We ask simply/);
+  expect(res.quotes[1]).toMatch(/Big Book p\. 86/);
 });
