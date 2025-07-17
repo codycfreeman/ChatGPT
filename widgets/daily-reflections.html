@@ -41,12 +41,14 @@ function parseJinaText(raw){
   while(i<lines.length){
     let t=lines[i].trim();
     if(!t.startsWith('**')) break;
-    t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').replace(/^"|"$/g,'').trim();
-    const key=t.replace(/["'“”‘’]/g,'').toLowerCase();
+    t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').trim();
+    t=t.replace(/^['"“”‘’]+|['"“”‘’]+$/g,'').trim();
+    t=t.replace(/\s+/g,' ');
+    const key=t.toLowerCase();
     if(t && !seen.has(key)){
       seen.add(key);
       quotes.push(t);
-      if(quotes.length>=4){i++;break;}
+      if(quotes.length>=2){i++;break;}
     }
     i++;
   }
