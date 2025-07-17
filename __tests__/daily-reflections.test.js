@@ -35,6 +35,7 @@ const sample7=fs.readFileSync(new URL('../tests/fixtures/fail-left-right.txt', i
 const jina1=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina.txt', import.meta.url),'utf8');
 const jina2=fs.readFileSync(new URL('../tests/__fixtures__/sample-jina-footer.txt', import.meta.url),'utf8');
 const jinaDup=fs.readFileSync(new URL('../tests/fixtures/dup-quotes-jina.txt', import.meta.url),'utf8');
+const dupQuote=fs.readFileSync(new URL('../tests/fixtures/dup-quote.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -110,4 +111,11 @@ test('dedupes duplicate quote lines',()=>{
   expect(res.quotes.length).toBe(2);
   expect(res.quotes[0]).toMatch(/throughout the day/);
   expect(res.quotes[1]).toMatch(/Big Book p. 86/);
+});
+
+test('dedupes and limits to two quote lines',()=>{
+  const res=parseJinaText(dupQuote);
+  expect(res.quotes.length).toBe(2);
+  expect(res.quotes[0]).toMatch(/My stability came out/);
+  expect(res.quotes[1]).toMatch(/Thus I think it can work out/);
 });
