@@ -63,18 +63,19 @@ export function parseJinaText(raw){
     i++;
   }
   while(i<lines.length && !lines[i].trim()) i++;
-  if(i<lines.length){out.date=lines[i].trim(); i++;}
-  const quotes=[]; const seen=new Set();
+  if(i<lines.length){out.date=lines[i].trim();i++;}
+  const quotes=[], seen=new Set();
   while(i<lines.length){
-    let t=lines[i].trim();
-    if(!t.startsWith('**')) break;
-    t=t.replace(/^\*\*\s*/,'').replace(/\*\*$/,'').trim();
-    t=t.replace(/^['"“”‘’]+|['"“”‘’]+$/g,'').trim();
-    t=t.replace(/\s+/g,' ');
-    const key=t.toLowerCase();
-    if(t && !seen.has(key)){
-      seen.add(key);
-      quotes.push(t);
+    const rawLine=lines[i];
+    const t=rawLine.trim();
+    if(!t || !t.startsWith('**')) break;
+    let q=t.replace(/^\*+|\*+$/g,'').trim();
+    q=q.replace(/^['"“”‘’]+|['"“”‘’]+$/g,'').trim();
+    q=q.replace(/\s+/g,' ');
+    const canon=q.toLowerCase().replace(/[^\w.\s]/g,'');
+    if(q && !seen.has(canon)){
+      seen.add(canon);
+      quotes.push(q);
       if(quotes.length>=2){i++;break;}
     }
     i++;
