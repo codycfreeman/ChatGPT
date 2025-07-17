@@ -65,23 +65,29 @@ export function parseJinaText(raw){
   while(i<lines.length && !lines[i].trim()) i++;
   if(i<lines.length){out.date=lines[i].trim();i++;}
   const rawQuotes=[];
-  while(i<lines.length && rawQuotes.length<6){
+  while(i<lines.length && rawQuotes.length<12){
     const t=lines[i].trim();
     if(!t || !t.startsWith('**')) break;
     rawQuotes.push(t);
     i++;
+    if(i<lines.length && !lines[i].trim()) break;
   }
-  const quotes=[],bodyPrepend=[],seen=new Set();
+  const quoteCandidates=[],bodyPrepend=[],qMap=new Map(),bMap=new Map();
   for(const t of rawQuotes){
     let q=t.replace(/^\*+|\*+$/g,'').trim();
     q=q.replace(/^['"“”‘’]+|['"“”‘’]+$/g,'').trim();
     q=q.replace(/\s+/g,' ');
-    const canon=q.toLowerCase().replace(/[^\w.\s]/g,'');
-    if(!q || seen.has(canon)) continue;
-    seen.add(canon);
-    if(q.length>160) bodyPrepend.push(q);
-    else if(quotes.length<2) quotes.push(q);
+    const canon=q.toLowerCase().replace(/[^a-z0-9.\s]/gi,'').trim();
+    if(!q) continue;
+    if(q.length>160){
+      if(!bMap.has(canon)){bMap.set(canon,true);bodyPrepend.push(q);}
+    }else{
+      if(!qMap.has(canon)){qMap.set(canon,true);quoteCandidates.push(q);}
+    }
   }
+  const quotes=quoteCandidates.slice(0,2);
+  console.debug('[DR] quotes:', quotes);
+  console.debug('[DR] bodyPrepend:', bodyPrepend);
   out.quotes=quotes;
   const foot=[/^\*\s+Left/i,/^\*\s+Right/i,/Plain text via/i,/Make a Contribution/i,/Online Bookstore/i,/Select your language/i];
   const paras=[]; let p=[];

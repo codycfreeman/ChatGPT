@@ -39,6 +39,8 @@ const dupQuote=fs.readFileSync(new URL('../tests/fixtures/dup-quote.txt', import
 const dupQuoteRaw=fs.readFileSync(new URL('../tests/fixtures/dup-quote-raw.txt', import.meta.url),'utf8');
 const dupQuoteVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-variant.txt', import.meta.url),'utf8');
 const dupQuoteLong=fs.readFileSync(new URL('../tests/fixtures/dup-quote-long.txt', import.meta.url),'utf8');
+const liveDupCluster=fs.readFileSync(new URL('../tests/fixtures/live-dup-cluster.txt', import.meta.url),'utf8');
+const liveDupVariant=fs.readFileSync(new URL('../tests/fixtures/live-dup-variant.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -146,4 +148,22 @@ test('handles long quote block dedupe and promotion',()=>{
   expect(match?.length).toBe(1);
   expect(res.body.startsWith('Thus I think it can work out with emotional sobriety')).toBe(true);
   expect(res.body).not.toMatch(/Left \* Right/);
+});
+
+test('dedupes duplicated quote clusters',()=>{
+  const p=parseJinaText(liveDupCluster);
+  expect(p.quotes.length).toBeLessThanOrEqual(2);
+  expect(p.quotes[0]).toMatch(/My stability came out of trying to give/i);
+  expect(p.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/i);
+  expect(p.body).toMatch(/Thus I think it can work out with emotional sobriety/i);
+  expect((p.body.match(/emotional sobriety/gi) || []).length).toBe(2);
+});
+
+test('dedupes variant quote clusters with curly quotes',()=>{
+  const p=parseJinaText(liveDupVariant);
+  expect(p.quotes.length).toBeLessThanOrEqual(2);
+  expect(p.quotes[0]).toMatch(/My stability came out of trying to give/i);
+  expect(p.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/i);
+  expect(p.body).toMatch(/Thus I think it can work out with emotional sobriety/i);
+  expect((p.body.match(/emotional sobriety/gi) || []).length).toBe(2);
 });
