@@ -38,6 +38,7 @@ const jinaDup=fs.readFileSync(new URL('../tests/fixtures/dup-quotes-jina.txt', i
 const dupQuote=fs.readFileSync(new URL('../tests/fixtures/dup-quote.txt', import.meta.url),'utf8');
 const dupQuoteRaw=fs.readFileSync(new URL('../tests/fixtures/dup-quote-raw.txt', import.meta.url),'utf8');
 const dupQuoteVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-variant.txt', import.meta.url),'utf8');
+const dupQuoteLong=fs.readFileSync(new URL('../tests/fixtures/dup-quote-long.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -119,7 +120,7 @@ test('dedupes and limits to two quote lines',()=>{
   const res=parseJinaText(dupQuote);
   expect(res.quotes.length).toBe(2);
   expect(res.quotes[0]).toMatch(/My stability came out/);
-  expect(res.quotes[1]).toMatch(/Thus I think it can work out/);
+  expect(res.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/);
 });
 
 test('dedupes raw curly quote block',()=>{
@@ -132,6 +133,17 @@ test('dedupes raw curly quote block',()=>{
 test('handles punctuation variants',()=>{
   const res=parseJinaText(dupQuoteVariant);
   expect(res.quotes.length).toBe(2);
-  expect(res.quotes[0]).toMatch(/We ask simply/);
-  expect(res.quotes[1]).toMatch(/Big Book p\. 86/);
+  expect(res.quotes[0]).toMatch(/My stability came out/);
+  expect(res.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/);
+});
+
+test('handles long quote block dedupe and promotion',()=>{
+  const res=parseJinaText(dupQuoteLong);
+  expect(res.quotes.length).toBe(2);
+  expect(res.quotes[0]).toMatch(/My stability came out/);
+  expect(res.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/);
+  const match=res.body.match(/Thus I think it can work out with emotional sobriety/gi);
+  expect(match?.length).toBe(1);
+  expect(res.body.startsWith('Thus I think it can work out with emotional sobriety')).toBe(true);
+  expect(res.body).not.toMatch(/Left \* Right/);
 });

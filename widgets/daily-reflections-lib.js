@@ -64,21 +64,23 @@ export function parseJinaText(raw){
   }
   while(i<lines.length && !lines[i].trim()) i++;
   if(i<lines.length){out.date=lines[i].trim();i++;}
-  const quotes=[], seen=new Set();
-  while(i<lines.length){
-    const rawLine=lines[i];
-    const t=rawLine.trim();
+  const rawQuotes=[];
+  while(i<lines.length && rawQuotes.length<6){
+    const t=lines[i].trim();
     if(!t || !t.startsWith('**')) break;
+    rawQuotes.push(t);
+    i++;
+  }
+  const quotes=[],bodyPrepend=[],seen=new Set();
+  for(const t of rawQuotes){
     let q=t.replace(/^\*+|\*+$/g,'').trim();
     q=q.replace(/^['"“”‘’]+|['"“”‘’]+$/g,'').trim();
     q=q.replace(/\s+/g,' ');
     const canon=q.toLowerCase().replace(/[^\w.\s]/g,'');
-    if(q && !seen.has(canon)){
-      seen.add(canon);
-      quotes.push(q);
-      if(quotes.length>=2){i++;break;}
-    }
-    i++;
+    if(!q || seen.has(canon)) continue;
+    seen.add(canon);
+    if(q.length>160) bodyPrepend.push(q);
+    else if(quotes.length<2) quotes.push(q);
   }
   out.quotes=quotes;
   const foot=[/^\*\s+Left/i,/^\*\s+Right/i,/Plain text via/i,/Make a Contribution/i,/Online Bookstore/i,/Select your language/i];
@@ -90,6 +92,7 @@ export function parseJinaText(raw){
     p.push(t);
   }
   if(p.length) paras.push(p.join(' '));
+  if(bodyPrepend.length) paras.unshift(...bodyPrepend);
   out.body=paras.join('\n\n').trim();
   return out;
 }
