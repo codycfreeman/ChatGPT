@@ -129,3 +129,18 @@ export function parseJinaText(raw){
   out.body=paras.join('\n\n').trim();
   return out;
 }
+
+export function renderBlockquote(quotes=[]){
+  if(!quotes||!quotes.length) return '';
+  const seen=new Set();
+  const out=[];
+  for(const q of quotes){
+    const canon=q.toLowerCase().trim().replace(/\s+/g,' ').replace(/[^a-z0-9.\s]/gi,'');
+    if(!seen.has(canon)){seen.add(canon);out.push(q);}
+  }
+  const uniq=out.slice(0,2);
+  console.debug('[DR] postRender quotes', uniq);
+  if(uniq.length===1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
+  if(uniq.length>=2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
+  return '';
+}
