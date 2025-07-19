@@ -101,27 +101,50 @@ function parseJinaText(raw){
   return out;
 }
 // Final safeguard: dedupe quote lines globally so duplicates can never appear.
-function dedupe(rawQuotes=[]){
-  const canonical=str=>str.toLowerCase().trim().replace(/[“”"']/g,'').replace(/\s+/g,' ');
+function sha256(ascii){
+  const r=(n,x)=>n>>>x|n<<32-x;const m=2**32;let i,j,T1,T2;
+  const H=[1779033703,-1150833019,1013904242,-1521486534,1359893119,-1694144372,528734635,1541459225];
+  const K=[];for(i=0;i<64;)K[i]=((Math.abs(Math.sin(++i))*m)|0);
+  const b=[];for(i=0;i<ascii.length;i++)b.push(ascii.charCodeAt(i));
+  b.push(128);while(b.length%64-56)b.push(0);
+  const l=ascii.length*8;b.push(0,0,0,0,l>>>24,l>>>16&255,l>>>8&255,l&255);
+  const w=new Uint32Array(64);
+  for(i=0;i<b.length;){
+    for(j=0;j<16;j++,i+=4)w[j]=b[i]<<24|b[i+1]<<16|b[i+2]<<8|b[i+3];
+    for(j=16;j<64;j++){
+      const s0=r(w[j-15],7)^r(w[j-15],18)^w[j-15]>>>3;
+      const s1=r(w[j-2],17)^r(w[j-2],19)^w[j-2]>>>10;
+      w[j]=(w[j-16]+s0+w[j-7]+s1)|0;
+    }
+    let a=H[0],b2=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(j=0;j<64;j++){
+      const S1=r(e,6)^r(e,11)^r(e,25);
+      const ch=(e&f)^~e&g;T1=h+S1+ch+K[j]+w[j]|0;
+      const S0=r(a,2)^r(a,13)^r(a,22);
+      const maj=(a&b2)^(a&c)^(b2&c);T2=S0+maj|0;
+      h=g;g=f;f=e;e=d+T1|0;d=c;c=b2;b2=a;a=T1+T2|0;
+    }
+    H[0]=H[0]+a|0;H[1]=H[1]+b2|0;H[2]=H[2]+c|0;H[3]=H[3]+d|0;H[4]=H[4]+e|0;H[5]=H[5]+f|0;H[6]=H[6]+g|0;H[7]=H[7]+h|0;
+  }
+  return H.map(n=>('00000000'+(n>>>0).toString(16)).slice(-8)).join('');
+}
+function dedupeQuotes(rawQuotes=[]){
+  const canonical=s=>s.toLowerCase().trim().replace(/\s+/g,' ').replace(/[^a-z0-9.\s]/gi,'');
   const seen=new Set();
   const uniq=[];
   for(const line of rawQuotes){
-    const key=canonical(line);
-    if(!seen.has(key)){
-      seen.add(key);
-      uniq.push(line);
-    }
-  }
-  if(rawQuotes.length!==uniq.length) console.debug('[DR] removed dupes',rawQuotes.length-uniq.length);
-  return uniq;
+    const h=sha256(canonical(line));
+    if(!seen.has(h)){seen.add(h);uniq.push(line);} }
+  return uniq.slice(0,2);
 }
 function buildBlockquote(rawQuotes=[]){
-  const uniq=dedupe(rawQuotes);
-  const limited=uniq.slice(0,2);
-  if(!limited.length) return '';
-  console.debug('[DR] postRender quotes', limited);
-  if(limited.length===1) return `<blockquote><p class="dr-quote">${limited[0]}</p></blockquote>`;
-  if(limited.length>=2) return `<blockquote><p class="dr-quote">${limited[0]}</p><p class="dr-quote-src">${limited[1]}</p></blockquote>`;
+  const uniq=dedupeQuotes(rawQuotes);
+  const seen=new Set(uniq.map(q=>sha256(q.toLowerCase().trim().replace(/\s+/g,' ').replace(/[^a-z0-9.\s]/gi,''))));
+  if(uniq.length>2||seen.size!==uniq.length) throw new Error('Quote dedupe failed');
+  if(!uniq.length) return '';
+  console.debug('[DR] postRender quotes', uniq);
+  if(uniq.length===1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
+  if(uniq.length>=2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
   return '';
 }
 function render(d){
@@ -140,7 +163,8 @@ function render(d){
   card.innerHTML=h;
 }
 window.parseJinaText=parseJinaText;
-buildBlockquote.dedupe=dedupe;
+buildBlockquote.dedupe=dedupeQuotes;
+window.dedupeQuotes=dedupeQuotes;
 window.buildBlockquote=buildBlockquote;
 fetchText().then(t=>render(parseJinaText(t))).catch(()=>render(null));
 </script>
