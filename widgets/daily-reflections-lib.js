@@ -132,18 +132,24 @@ export function parseJinaText(raw){
 
 // Final safeguard: dedupe quotes right before rendering so any
 // downstream logic can never surface duplicates.
-export function renderBlockquote(quotes=[]){
-  if(!quotes || !quotes.length) return '';
-  const seen=new Set();
-  const deduped=[];
-  for(const q of quotes){
-    const canon=q.toLowerCase().trim().replace(/\s+/g,' ').replace(/[^a-z0-9.\s]/gi,'');
-    if(!seen.has(canon)){seen.add(canon);deduped.push(q);}
+export function dedupeRenderQuotes(arr = []){
+  const canonical = l => l.toLowerCase().trim().replace(/[“”"']/g, '').replace(/\s+/g, ' ');
+  const unique = [];
+  let prev = '';
+  for (const line of arr) {
+    const canon = canonical(line);
+    if (canon && canon !== prev) unique.push(line);
+    prev = canon;
   }
-  if(deduped.length>2) throw new Error('DR dedupe failed');
-  const uniq=deduped.slice(0,2);
+  if (unique.length !== arr.length) console.debug('[DR] duplicates removed');
+  return unique.slice(0, 2);
+}
+
+export function renderBlockquote(quotes = []){
+  const uniq = dedupeRenderQuotes(quotes);
+  if (!uniq.length) return '';
   console.debug('[DR] postRender quotes', uniq);
-  if(uniq.length===1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
-  if(uniq.length>=2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
+  if (uniq.length === 1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
+  if (uniq.length >= 2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
   return '';
 }
