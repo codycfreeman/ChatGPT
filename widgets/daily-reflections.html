@@ -100,6 +100,8 @@ function parseJinaText(raw){
   out.body=paras.join('\n\n').trim();
   return out;
 }
+// Final safeguard: dedupe quotes again before inserting HTML so
+// duplicate blocks can never appear.
 function renderBlockquote(quotes){
   if(!quotes||!quotes.length) return '';
   const seen=new Set();
