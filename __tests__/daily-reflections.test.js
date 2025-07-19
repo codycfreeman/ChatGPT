@@ -41,6 +41,8 @@ const dupQuoteVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-varia
 const dupQuoteLong=fs.readFileSync(new URL('../tests/fixtures/dup-quote-long.txt', import.meta.url),'utf8');
 const liveDupCluster=fs.readFileSync(new URL('../tests/fixtures/live-dup-cluster.txt', import.meta.url),'utf8');
 const liveDupVariant=fs.readFileSync(new URL('../tests/fixtures/live-dup-variant.txt', import.meta.url),'utf8');
+const dupQuoteJuly19=fs.readFileSync(new URL('../tests/fixtures/dup-quote-july19.txt', import.meta.url),'utf8');
+const dupQuoteHashVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-hash-variant.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -166,4 +168,18 @@ test('dedupes variant quote clusters with curly quotes',()=>{
   expect(p.quotes[1]).toMatch(/THE LANGUAGE OF THE HEART/i);
   expect(p.body).toMatch(/Thus I think it can work out with emotional sobriety/i);
   expect((p.body.match(/emotional sobriety/gi) || []).length).toBe(2);
+});
+
+test('dedupes July 19 duplicated quote cluster',()=>{
+  const p=parseJinaText(dupQuoteJuly19);
+  expect(p.quotes.length).toBe(2);
+  expect(p.quotes[0]).toMatch(/Many of us who had thought ourselves religious/i);
+  expect(p.quotes[1]).toMatch(/TWELVE STEPS AND TWELVE TRADITIONS/i);
+});
+
+test('dedupes quote hash variants',()=>{
+  const p=parseJinaText(dupQuoteHashVariant);
+  expect(p.quotes.length).toBe(2);
+  expect(p.quotes[0]).toMatch(/Many of us who had thought ourselves religious/i);
+  expect(p.quotes[1]).toMatch(/TWELVE STEPS AND TWELVE TRADITIONS/i);
 });
