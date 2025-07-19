@@ -100,17 +100,27 @@ function parseJinaText(raw){
   out.body=paras.join('\n\n').trim();
   return out;
 }
+function renderBlockquote(quotes){
+  if(!quotes||!quotes.length) return '';
+  const seen=new Set();
+  const out=[];
+  for(const q of quotes){
+    const canon=q.toLowerCase().trim().replace(/\s+/g,' ').replace(/[^a-z0-9.\s]/gi,'');
+    if(!seen.has(canon)){seen.add(canon);out.push(q);}
+  }
+  const uniq=out.slice(0,2);
+  console.debug('[DR] postRender quotes', uniq);
+  if(uniq.length===1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
+  if(uniq.length>=2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
+  return '';
+}
 function render(d){
   const card=document.getElementById('card');
   if(!d) return card.innerHTML='<p>Unable to load today\'s Daily Reflection.</p>';
   let h=`<h2>${d.title}</h2>`;
   if(d.date) h+=`<div class="date">${d.date}</div>`;
   if(d.quotes && d.quotes.length){
-    if(d.quotes.length===1){
-      h+=`<blockquote><p class="dr-quote">${d.quotes[0]}</p></blockquote>`;
-    }else if(d.quotes.length>=2){
-      h+=`<blockquote><p class="dr-quote">${d.quotes[0]}</p><p class="dr-quote-src">${d.quotes[1]}</p></blockquote>`;
-    }
+    h+=renderBlockquote(d.quotes);
   }
   if(d.body){
     const ps=d.body.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('');
