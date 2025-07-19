@@ -130,6 +130,8 @@ export function parseJinaText(raw){
   return out;
 }
 
+// Final safeguard: dedupe quotes right before rendering so any
+// downstream logic can never surface duplicates.
 export function renderBlockquote(quotes=[]){
   if(!quotes||!quotes.length) return '';
   const seen=new Set();
