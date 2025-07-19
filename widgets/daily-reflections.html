@@ -100,26 +100,28 @@ function parseJinaText(raw){
   out.body=paras.join('\n\n').trim();
   return out;
 }
-// Final safeguard: dedupe quotes again before inserting HTML so
-// duplicate blocks can never appear.
-function dedupeRenderQuotes(arr=[]){
-  const canonical=l=>l.toLowerCase().trim().replace(/[“”"']/g,'').replace(/\s+/g,' ');
-  const unique=[];
-  let prev='';
-  for(const line of arr){
-    const canon=canonical(line);
-    if(canon && canon!==prev) unique.push(line);
-    prev=canon;
+// Final safeguard: dedupe quote lines globally so duplicates can never appear.
+function dedupe(rawQuotes=[]){
+  const canonical=str=>str.toLowerCase().trim().replace(/[“”"']/g,'').replace(/\s+/g,' ');
+  const seen=new Set();
+  const uniq=[];
+  for(const line of rawQuotes){
+    const key=canonical(line);
+    if(!seen.has(key)){
+      seen.add(key);
+      uniq.push(line);
+    }
   }
-  if(unique.length!==arr.length) console.debug('[DR] duplicates removed');
-  return unique.slice(0,2);
+  if(rawQuotes.length!==uniq.length) console.debug('[DR] removed dupes',rawQuotes.length-uniq.length);
+  return uniq;
 }
-function renderBlockquote(quotes){
-  const uniq=dedupeRenderQuotes(quotes);
-  if(!uniq.length) return '';
-  console.debug('[DR] postRender quotes', uniq);
-  if(uniq.length===1) return `<blockquote><p class="dr-quote">${uniq[0]}</p></blockquote>`;
-  if(uniq.length>=2) return `<blockquote><p class="dr-quote">${uniq[0]}</p><p class="dr-quote-src">${uniq[1]}</p></blockquote>`;
+function buildBlockquote(rawQuotes=[]){
+  const uniq=dedupe(rawQuotes);
+  const limited=uniq.slice(0,2);
+  if(!limited.length) return '';
+  console.debug('[DR] postRender quotes', limited);
+  if(limited.length===1) return `<blockquote><p class="dr-quote">${limited[0]}</p></blockquote>`;
+  if(limited.length>=2) return `<blockquote><p class="dr-quote">${limited[0]}</p><p class="dr-quote-src">${limited[1]}</p></blockquote>`;
   return '';
 }
 function render(d){
@@ -128,7 +130,7 @@ function render(d){
   let h=`<h2>${d.title}</h2>`;
   if(d.date) h+=`<div class="date">${d.date}</div>`;
   if(d.quotes && d.quotes.length){
-    h+=renderBlockquote(d.quotes);
+    h+=buildBlockquote(d.quotes);
   }
   if(d.body){
     const ps=d.body.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('');
@@ -138,6 +140,8 @@ function render(d){
   card.innerHTML=h;
 }
 window.parseJinaText=parseJinaText;
+buildBlockquote.dedupe=dedupe;
+window.buildBlockquote=buildBlockquote;
 fetchText().then(t=>render(parseJinaText(t))).catch(()=>render(null));
 </script>
 </body>
