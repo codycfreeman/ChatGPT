@@ -43,6 +43,7 @@ const liveDupCluster=fs.readFileSync(new URL('../tests/fixtures/live-dup-cluster
 const liveDupVariant=fs.readFileSync(new URL('../tests/fixtures/live-dup-variant.txt', import.meta.url),'utf8');
 const dupQuoteJuly19=fs.readFileSync(new URL('../tests/fixtures/dup-quote-july19.txt', import.meta.url),'utf8');
 const dupQuoteHashVariant=fs.readFileSync(new URL('../tests/fixtures/dup-quote-hash-variant.txt', import.meta.url),'utf8');
+const falsePrideDup=fs.readFileSync(new URL('../tests/fixtures/false-pride-dup.txt', import.meta.url),'utf8');
 
 test('filters leftover navigation text',()=>{
   const {title,body}=parsePlainText(sample3);
@@ -182,4 +183,11 @@ test('dedupes quote hash variants',()=>{
   expect(p.quotes.length).toBe(2);
   expect(p.quotes[0]).toMatch(/Many of us who had thought ourselves religious/i);
   expect(p.quotes[1]).toMatch(/TWELVE STEPS AND TWELVE TRADITIONS/i);
+});
+
+test('dedupes false pride duplicate lines',()=>{
+  const p=parseJinaText(falsePrideDup);
+  expect(p.quotes.length).toBe(2);
+  expect(p.quotes[0]).toMatch(/Many of us who had thought/i);
+  expect(p.quotes[1]).toMatch(/TWELVE STEPS/i);
 });
